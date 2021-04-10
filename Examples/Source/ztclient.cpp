@@ -120,7 +120,7 @@ ZeroTierEventHandler eventHandler{localNode};
 
 int main(int argc, char** argv)
 try {
-#if 1
+#if 0
 	if (argc != 6) {
 		printf("\nlibzt example client\n");
 		printf("client <config_file_path> <nwid> <remoteAddr> <remotePort> <ztServicePort>\n");
@@ -134,7 +134,7 @@ try {
 #else
 	std::string identityPath = "ZTNodeData";
 	uint64_t nwid = strtoull("a09acf0233ceff5c", NULL, 16); // Network ID to join
-	std::string remoteAddrStr = "172.29.11.27"; // Remote application's virtual ZT address
+	std::string remoteAddrStr = "172.29.82.147"; // Remote application's virtual ZT address
 	int remotePort = 8888; // Port the application will try to connect to the server on
 	int ztServicePort = 9994; // Port ZT uses to send encrypted UDP packets to peers (try something like 9994)
 #endif
