@@ -16,6 +16,8 @@
 
 ZTCPP_NAMESPACE_BEGIN
 
+// TODO: make RAII wrappers for this stuff
+
 ZTCPP_API int StartZeroTierService(const std::string& aConfigFilePath, uint16_t aServicePort);
 ZTCPP_API int StopZeroTierService();
 ZTCPP_API int FreeZeroTierServiceResources();

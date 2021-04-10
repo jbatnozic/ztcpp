@@ -120,7 +120,7 @@ ZeroTierEventHandler eventHandler{localNode};
 
 int main(int argc, char** argv)
 try {
-#if 0
+#if 1
 	if (argc != 6) {
 		printf("\nlibzt example client\n");
 		printf("client <config_file_path> <nwid> <remoteAddr> <remotePort> <ztServicePort>\n");
@@ -181,9 +181,9 @@ try {
 	char recvBuf[128];
 	memset(recvBuf, 0, sizeof(recvBuf));
 
-	zt::UdpSocket socket;
+	zt::Socket socket;
 	{
-		auto res = socket.init(zt::SocketDomain::InternetProtocol_IPv4);
+		auto res = socket.init(zt::SocketDomain::InternetProtocol_IPv4, zt::SocketType::Datagram);
 		ZTCPP_THROW_ON_ERROR(res, std::runtime_error);
 	}
 	{
@@ -198,7 +198,7 @@ try {
 	}
 
 	for (int i = 0; i < 10; i += 1) {
-		auto res = socket.send(msgStr, strlen(msgStr), remoteAddr, remotePort);
+		auto res = socket.sendTo(msgStr, strlen(msgStr), remoteAddr, remotePort);
 		ZTCPP_THROW_ON_ERROR(res, std::runtime_error);
 		printf("sent %d bytes\n", (int)*res);
 		std::this_thread::sleep_for(std::chrono::milliseconds{500});

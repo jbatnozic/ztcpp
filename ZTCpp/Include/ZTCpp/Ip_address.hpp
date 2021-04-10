@@ -39,9 +39,9 @@ public:
   std::uint32_t  getIPv4AddressInNetworkOrder() const;
   RawIPv6Address getIPv6AddressInNetworkOrder() const;
 
-  friend bool operator==(const IpAddress& aLeft, const IpAddress& aRight);
-  friend bool operator!=(const IpAddress& aLeft, const IpAddress& aRight);
-  friend std::ostream& operator<<(std::ostream& aOstream, const IpAddress& aAddress);
+  ZTCPP_API friend bool operator==(const IpAddress& aLeft, const IpAddress& aRight);
+  ZTCPP_API friend bool operator!=(const IpAddress& aLeft, const IpAddress& aRight);
+  ZTCPP_API friend std::ostream& operator<<(std::ostream& aOstream, const IpAddress& aAddress);
 
 private:
   std::uint32_t _addressBuf[4]; // 128 bits can hold both ipv4 and ipv6 addresses

@@ -114,16 +114,16 @@ RawIPv6Address IpAddress::getIPv6AddressInNetworkOrder() const {
   return result;
 }
 
-bool operator==(const IpAddress& aLeft, const IpAddress& aRight) {
+ZTCPP_API bool operator==(const IpAddress& aLeft, const IpAddress& aRight) {
   return (aLeft._addressFamily == aRight._addressFamily) &&
     (std::memcmp(aLeft._addressBuf, aRight._addressBuf, sizeof(std::uint32_t) * 4) == 0);
 }
 
-bool operator!=(const IpAddress& aLeft, const IpAddress& aRight) {
+ZTCPP_API bool operator!=(const IpAddress& aLeft, const IpAddress& aRight) {
   return !(aLeft == aRight);
 }
 
-std::ostream& operator<<(std::ostream& aStream, const IpAddress& aAddress) {
+ZTCPP_API std::ostream& operator<<(std::ostream& aStream, const IpAddress& aAddress) {
   return (aStream << aAddress.toString());
 }
 
