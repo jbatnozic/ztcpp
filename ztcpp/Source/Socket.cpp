@@ -1,58 +1,11 @@
 
-#include "udpsocket.hpp"
+#include <ZTCpp/Socket.hpp>
+
+#include "Sockaddr_util.hpp"
 
 #include <ZeroTierSockets.h>
 
-#if defined(_WIN32)
-#include <winsock.h>
-#else
-include internet stuff for htons/ntohs (TODO)
-#endif
-
-namespace jbatnozic {
-namespace ztcpp {
-namespace {
-// doesn't check aIpAddress validity, take care
-struct zts_sockaddr_storage ToSockaddr(const IpAddress& aIpAddress, std::uint16_t aPortInHostOrder) {
-    switch (aIpAddress.getAddressFamily()) {
-    case AddressFamily::IPv4:
-        {
-            struct zts_sockaddr_in result;
-
-            result.sin_family = ZTS_AF_INET;
-            result.sin_port = htons(aPortInHostOrder);
-#ifdef _WIN32
-            result.sin_addr.S_addr = aIpAddress.getIPv4AddressInNetworkOrder();
-#else
-            result.sin_addr.s_addr = aIpAddress.getIPv4AddressInNetworkOrder();
-#endif
-            result.sin_len = sizeof(result);
-            std::memset(&(result.sin_zero), 0x00, sizeof(result.sin_zero) / sizeof(result.sin_zero[0]));
-
-            return *reinterpret_cast<struct zts_sockaddr_storage*>(&result);
-        }
-
-    case AddressFamily::IPv6:
-        {
-            struct zts_sockaddr_in6 result;
-
-            result.sin6_family = ZTS_AF_INET6;
-            result.sin6_port = htons(aPortInHostOrder);
-            auto rawIPv6Addr = aIpAddress.getIPv6AddressInNetworkOrder();
-            std::memcpy(&(result.sin6_addr), &rawIPv6Addr, sizeof(result.sin6_addr));
-            result.sin6_len = sizeof(result);
-            result.sin6_flowinfo = 0;
-            result.sin6_scope_id = 0;
-
-            return *reinterpret_cast<struct zts_sockaddr_storage*>(&result);
-        }
-
-    default: void(); // Do nothing
-    }
-
-    return {};
-}
-} // namespace
+ZTCPP_NAMESPACE_BEGIN
 
 class UdpSocket::Impl {
 public:
@@ -96,7 +49,7 @@ public:
                                        "aLocalIpAddress is of wrong address family")};
         }
 
-        const auto sockaddr = ToSockaddr(aLocalIpAddress, aLocalPortInHostOrder);
+        const auto sockaddr = detail::ToSockaddr(aLocalIpAddress, aLocalPortInHostOrder);
         const auto res = zts_bind(_socketID, 
                                   reinterpret_cast<const struct zts_sockaddr*>(&sockaddr), 
                                   sizeof(sockaddr));
@@ -142,7 +95,7 @@ public:
                                        "aRemoteIpAddress is of wrong address family")};
         }
 
-        const auto sockaddr = ToSockaddr(aRemoteIpAddress, aLocalPortInHostOrder);
+        const auto sockaddr = detail::ToSockaddr(aRemoteIpAddress, aLocalPortInHostOrder);
         const auto byteCount = zts_sendto(_socketID, 
                                           aData, aDataByteSize, 
                                           0, 
@@ -283,5 +236,4 @@ EmptyResult UdpSocket::close() {
     return _impl->close();
 }
 
-} // namespace ztcpp
-} // namespace jbatnozic
+ZTCPP_NAMESPACE_END

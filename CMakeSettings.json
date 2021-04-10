@@ -2,23 +2,23 @@
   // See https://go.microsoft.com//fwlink//?linkid=834763 for more information about this file.
   "configurations": [
     {
-      "name": "ztcpp-x64-debug",
+      "name": "ZTCpp-x64-Debug",
       "generator": "Ninja",
       "configurationType": "Debug",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${projectDir}\\build\\${name}",
-      "installRoot": "${projectDir}\\build.out\\install\\${name}",
+      "buildRoot": "${projectDir}\\Build\\${name}",
+      "installRoot": "${projectDir}\\Build.out\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": ""
     },
     {
-      "name": "ztcpp-x64-release",
+      "name": "ZTCpp-x64-Release",
       "generator": "Ninja",
       "configurationType": "Release",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "buildRoot": "${projectDir}\\build\\${name}",
-      "installRoot": "${projectDir}\\build.out\\install\\${name}",
+      "buildRoot": "${projectDir}\\Build\\${name}",
+      "installRoot": "${projectDir}\\Build.out\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": ""

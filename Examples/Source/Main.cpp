@@ -70,15 +70,15 @@ ztcpp::EventHandlers MakeEventHandlers() {
     };
 
   handlers.netIFDetailsHandler =
-    [](EventCode::NetIF aEventCode, const NetIFDetails* aNodeDetails) {
-      if (aEventCode == EventCode::NetIF::Up) {
+    [](EventCode::NetworkInterface aEventCode, const NetworkInterfaceDetails* aNodeDetails) {
+      if (aEventCode == EventCode::NetworkInterface::Up) {
         //printf("ZTS_EVENT_NETIF_UP --- network=%llx, mac=%llx, mtu=%d\n",
         //       msg->netif->nwid,
         //       msg->netif->mac,
         //       msg->netif->mtu);
         printf("ZTS_EVENT_NETIF_UP --- network=<unknown>, mac=<unknown>, mtu=<unknown>\n");
       }
-      else if (aEventCode == EventCode::NetIF::Down) {
+      else if (aEventCode == EventCode::NetworkInterface::Down) {
         //printf("ZTS_EVENT_NETIF_DOWN --- network=%llx, mac=%llx\n",
         //       msg->netif->nwid,
         //       msg->netif->mac);
