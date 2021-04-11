@@ -41,8 +41,11 @@ public:
 
   EmptyResult init(SocketDomain aSocketDomain, SocketType aSocketType);
 
+  //! Bind the socket to a local address and port.
+  //! Note: The socket will work even if bound to an unspecified address.
   EmptyResult bind(const IpAddress& aLocalIpAddress, uint16_t aLocalPortInHostOrder);
 
+  //! NOT YET IMPLEMENTED (TODO)
   EmptyResult connect(const IpAddress& aRemoteIpAddress,
                       uint16_t aRemotePortInHostOrder);
 
@@ -50,37 +53,57 @@ public:
 
   EmptyResult accept(); // TODO
 
-  // TODO: send
+  // TODO: send()
 
   Result<std::size_t> sendTo(const void* aData,
                              std::size_t aDataByteSize,
                              const IpAddress& aRemoteIpAddress,
                              uint16_t aRemotePortInHostOrder);
 
-  // TODO: receive
+  // TODO: receive()
 
+  //! If the destination buffer is not large enough to hold the whole message, that was
+  //! received, it will be truncanted to fit and no error will be reported. Thus, unless
+  //! you know in advance what kind of messages will be received, the safest approach 
+  //! would be to provide as large a buffer as you can. Note that the theoretical limit
+  //! for both TCP and UDP packet size is 64kB, so anything more that that is a certain 
+  //! waste of memory.
   Result<std::size_t> receiveFrom(void* aDestinationBuffer,
                                   std::size_t aDestinationBufferByteSize,
                                   IpAddress& aSenderAddress,
                                   uint16_t& aSenderPort);
 
-  // Select?
-
   //! On success, compare with PollEventBitmask::Enum to see which events have occurred
+  //! Blocks until any event marked in aInterestedIn occurs, or until aMaxTimeToWait has passed
   //! If aMaxTimeToWait is 0, return immediately. If it is negative, waits indefinitely until an event occurs
   Result<int> pollEvents(PollEventBitmask::Enum aInterestedIn = PollEventBitmask::AnyEvent,
                          std::chrono::milliseconds aMaxTimeToWait = std::chrono::milliseconds{0}) const;
 
-  Result<IpAddress> getLocalIpAddress() const; // TODO
-  Result<uint16_t> getLocalPort() const; // TODO
-  // TODO remote IP/port
+  //! Return the address to which the socket was bound.
+  //! Will return an all-zero address for an unbound socket.
+  Result<IpAddress> getLocalIpAddress() const;
+
+  //! Return the port number to which the socket was bound.
+  //! Will return port 0 for an unbound socket.
+  Result<uint16_t> getLocalPort() const;
+
+  //! If the socket is connected to a remote, return the remote's IP address.
+  //! Otherwise, returns an error.
+  Result<IpAddress> getRemoteIpAddress() const;
+
+  //! If the socket is connected to a remote, return the remote's port number.
+  //! Otherwise, returns an error.
+  Result<uint16_t> getRemotePort() const;
+
+  //! Return true if the socket was initialized successfully and is ready to send
+  //! and receive traffic. Once close() is called, isOpen() will return false again.
+  bool isOpen() const;
+
 
   EmptyResult close();
 
   // Control commands
-  // TODO
-  EmptyResult setNonBlocking(bool aNonBlocking);
-  Result<bool> getNonBlocking() const;
+  // TODO RDONLY, WRONLY
 
 private:
   class Impl;

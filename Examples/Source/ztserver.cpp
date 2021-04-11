@@ -18,6 +18,8 @@ public:
 	bool online = false;
 	int networksJoinedCount = 0;
 	uint64_t id = 0;
+	zt::IpAddress ip4 = zt::IpAddress::ipv4Unspecified();
+	zt::IpAddress ip6 = zt::IpAddress::ipv6Unspecified();
 };
 
 class ZeroTierEventHandler : public zt::IEventHandler {
@@ -29,6 +31,10 @@ public:
 
 	void onAddressEvent(zt::EventCode::Address aEventCode, const zt::AddressDetails* aDetails) noexcept override {
 		std::cout << zt::EventDescription(aEventCode, aDetails) << std::endl;
+
+		if (aDetails && aEventCode == zt::EventCode::Address::AddedIPv4) {
+			_nodeInfo.ip4 = aDetails->getIpAddress();
+		}
 	}
 
 	void onNetworkEvent(zt::EventCode::Network aEventCode, const zt::NetworkDetails* aDetails) noexcept override {
@@ -146,6 +152,7 @@ try {
 
 	printf("Initializing socket...\n");
 	zt::Socket socket;
+
 	{
 		auto res = socket.init(zt::SocketDomain::InternetProtocol_IPv4, zt::SocketType::Datagram);
 		ZTCPP_THROW_ON_ERROR(res, std::runtime_error);
@@ -153,8 +160,16 @@ try {
 
 	printf("Binding socket to port %d...\n", serverBindPort);
 	{
-		auto res = socket.bind(zt::IpAddress::ipv4Unspecified(), serverBindPort);
+		auto res = socket.bind(localNode.ip4, serverBindPort);
 		ZTCPP_THROW_ON_ERROR(res, std::runtime_error);
+	}
+
+	{
+		const auto ip   = socket.getLocalIpAddress();
+		ZTCPP_THROW_ON_ERROR(ip, std::runtime_error);
+		const auto port = socket.getLocalPort();
+		ZTCPP_THROW_ON_ERROR(port, std::runtime_error);
+		std::cout << "Local socket: " << *ip << ":" << *port << '\n';
 	}
 
 	printf("Receiving data...\n");

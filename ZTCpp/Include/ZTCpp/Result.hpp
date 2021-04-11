@@ -33,8 +33,8 @@ struct ErrorReport {
 #define ZTCPP_ERROR_REPORT(_error_code_, _message_) \
   std::make_unique<ErrorReport>( \
     ErrorCode::_error_code_,  \
-    std::string{ZTCPP_PRETTY_FUNCTION} \
-    + " - (" + #_error_code_ + ") " + _message_)
+    std::string{"ZTCpp:"} + #_error_code_ + " - \"" + _message_ \
+    + "\" in function: " + std::string{ZTCPP_PRETTY_FUNCTION})
 
 struct DummyResultType {};
 

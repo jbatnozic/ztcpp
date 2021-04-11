@@ -460,7 +460,7 @@ ZTCPP_API std::string EventDescription(EventCode::Address aEventCode, const Addr
     ss << "Address event: AddedIPv4 (ZTS_EVENT_ADDR_ADDED_IP4)";
     if (aDetails) {
       ss << "\n    IP address: " << aDetails->getIpAddress();
-      ss << "\n    Node ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Node ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -472,7 +472,7 @@ ZTCPP_API std::string EventDescription(EventCode::Address aEventCode, const Addr
     ss << "Address event: RemovedIPv4 (ZTS_EVENT_ADDR_REMOVED_IP4)";
     if (aDetails) {
       ss << "\n    IP address: " << aDetails->getIpAddress();
-      ss << "\n    Node ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Node ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -484,7 +484,7 @@ ZTCPP_API std::string EventDescription(EventCode::Address aEventCode, const Addr
     ss << "Address event: AddedIPv6 (ZTS_EVENT_ADDR_ADDED_IP6)";
     if (aDetails) {
       ss << "\n    IP address: " << aDetails->getIpAddress();
-      ss << "\n    Node ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Node ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -497,7 +497,7 @@ ZTCPP_API std::string EventDescription(EventCode::Address aEventCode, const Addr
     ss << "Address event: RemovedIPv4 (ZTS_EVENT_ADDR_REMOVED_IP4)";
     if (aDetails) {
       ss << "\n    IP address: " << aDetails->getIpAddress();
-      ss << "\n    Node ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Node ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -519,7 +519,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
   case EventCode::Network::NotFound:
     ss << "Network event: Up (ZTS_EVENT_NETWORK_NOT_FOUND)";
     if (aDetails) {
-      ss << "\n    Network ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Network ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -530,7 +530,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
   case EventCode::Network::ClientTooOld:
     ss << "Network event: ClientTooOld (ZTS_EVENT_NETWORK_CLIENT_TOO_OLD)";
       if (aDetails) {
-      ss << "\n    Network ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Network ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -540,7 +540,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
   case EventCode::Network::RequestingConfiguration:
     ss << "Network event: RequestingConfiguration (ZTS_EVENT_NETWORK_REQ_CONFIG)";
     if (aDetails) {
-      ss << "\n    Network ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Network ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -551,7 +551,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
   case EventCode::Network::OK:
     ss << "Network event: OK (ZTS_EVENT_NETWORK_OK)";
     if (aDetails) {
-      ss << "\n    Network ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Network ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -561,7 +561,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
   case EventCode::Network::AccessDenied:
     ss << "Network event: AccessDenied (ZTS_EVENT_NETWORK_ACCESS_DENIED)";
     if (aDetails) {
-      ss << "\n    Network ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Network ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -572,7 +572,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
   case EventCode::Network::ReadyIPv4:
     ss << "Network event: ReadyIPv4 (ZTS_EVENT_NETWORK_READY_IP4)";
     if (aDetails) {
-      ss << "\n    Network ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Network ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -583,7 +583,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
   case EventCode::Network::ReadyIPv6:
     ss << "Network event: ReadyIPv6 (ZTS_EVENT_NETWORK_READY_IP6)";
     if (aDetails) {
-      ss << "\n    Network ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Network ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -594,7 +594,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
   case EventCode::Network::ReadyIPv4_IPv6:
     ss << "Network event: ReadyIPv4_IPv6 (ZTS_EVENT_NETWORK_READY_IP4_IP6)";
     if (aDetails) {
-      ss << "\n    Network ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Network ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -605,7 +605,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
   case EventCode::Network::Down:
     ss << "Network event: Down (ZTS_EVENT_NETWORK_DOWN)";
     if (aDetails) {
-      ss << "\n    Network ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Network ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -615,7 +615,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
   case EventCode::Network::Update:
     ss << "Network event: Update (ZTS_EVENT_NETWORK_UPDATE)";
     if (aDetails) {
-      ss << "\n    Network ID: " << std::uppercase << std::hex << aDetails->getNetworkID();
+      ss << "\n    Network ID: " << std::hex << aDetails->getNetworkID();
     }
     else {
       ss << "\n    [No data available]";
@@ -651,7 +651,7 @@ ZTCPP_API std::string EventDescription(EventCode::Node aEventCode, const NodeDet
   case EventCode::Node::Online:
     ss << "Node event: Online (ZTS_EVENT_NODE_ONLINE)";
     if (aDetails) {
-      ss << "\n    Node ID: " << std::uppercase << std::hex << aDetails->getNodeID();
+      ss << "\n    Node ID: " << std::hex << aDetails->getNodeID();
     }
     else {
       ss << "\n    [No data available]";

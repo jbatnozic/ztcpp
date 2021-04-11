@@ -35,11 +35,11 @@ public:
 
     if (_socketID == ZTS_ERR_SOCKET) {
       return {ZTCPP_ERROR_REPORT(SocketError,
-                                 "ZTS_ERR_SOCKET (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
     if (_socketID == ZTS_ERR_SERVICE) {
       return {ZTCPP_ERROR_REPORT(ServiceError,
-                                 "ZTS_ERR_SERVICE (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
 
     return EmptyResultOK();
@@ -68,20 +68,20 @@ public:
 
     if (res == ZTS_ERR_SOCKET) {
       return {ZTCPP_ERROR_REPORT(SocketError,
-                                 "ZTS_ERR_SOCKET (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
     if (res == ZTS_ERR_SERVICE) {
       return {ZTCPP_ERROR_REPORT(ServiceError,
-                                 "ZTS_ERR_SERVICE (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
     if (res == ZTS_ERR_ARG) {
       return {ZTCPP_ERROR_REPORT(ArgumentError,
-                                 "ZTS_ERR_ARG (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
 
-    return {ZTCPP_ERROR_REPORT(RuntimeError,
+    return {ZTCPP_ERROR_REPORT(GenericError,
                                "Unknown error (zts_sendto returned " + std::to_string(res) +
-                               ", errno= " + std::to_string(zts_errno) + ")")};
+                               ", zts_errno= " + std::to_string(zts_errno) + ")")};
   }
 
   Result<std::size_t> sendTo(const void* aData,
@@ -115,20 +115,20 @@ public:
     }
     if (byteCount == ZTS_ERR_SOCKET) {
       return {ZTCPP_ERROR_REPORT(SocketError,
-                                 "ZTS_ERR_SOCKET (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
     if (byteCount == ZTS_ERR_SERVICE) {
       return {ZTCPP_ERROR_REPORT(ServiceError,
-                                 "ZTS_ERR_SERVICE (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
     if (byteCount == ZTS_ERR_ARG) {
       return {ZTCPP_ERROR_REPORT(ArgumentError,
-                                 "ZTS_ERR_ARG (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
 
-    return {ZTCPP_ERROR_REPORT(RuntimeError,
+    return {ZTCPP_ERROR_REPORT(GenericError,
                                "Unknown error (zts_sendto returned " + std::to_string(byteCount) +
-                               ", errno= " + std::to_string(zts_errno) + ")")};
+                               ", zts_errno= " + std::to_string(zts_errno) + ")")};
   }
 
   Result<std::size_t> receiveFrom(void* aDestinationBuffer,
@@ -158,38 +158,43 @@ public:
       return {static_cast<std::size_t>(byteCount)};
     }
     if (byteCount == ZTS_ERR_SOCKET) {
+      // TODO Temporary
       if (zts_errno == 140) {
         return {static_cast<std::size_t>(0)};
       }
       return {ZTCPP_ERROR_REPORT(SocketError,
-                                 "ZTS_ERR_SOCKET (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
     if (byteCount == ZTS_ERR_SERVICE) {
       return {ZTCPP_ERROR_REPORT(ServiceError,
-                                 "ZTS_ERR_SERVICE (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
     if (byteCount == ZTS_ERR_ARG) {
       return {ZTCPP_ERROR_REPORT(ArgumentError,
-                                 "ZTS_ERR_ARG (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
 
-    return {ZTCPP_ERROR_REPORT(RuntimeError,
+    return {ZTCPP_ERROR_REPORT(GenericError,
                                "Unknown error (zts_recvfrom returned " + std::to_string(byteCount) +
-                               ", errno= " + std::to_string(zts_errno) + ")")};
+                               ", zts_errno= " + std::to_string(zts_errno) + ")")};
+  }
+
+  bool isOpen() const {
+    return (_socketID >= 0);
   }
 
   EmptyResult close() {
-    if (_socketID >= 0) {
+    if (isOpen()) {
       const auto res = zts_close(_socketID);
       _socketID = ZTS_ERR_SOCKET;
 
       if (res == ZTS_ERR_SOCKET) {
         return {ZTCPP_ERROR_REPORT(SocketError,
-                                   "ZTS_ERR_SOCKET (errno=" + std::to_string(zts_errno) + ")")};
+                                   "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
       }
       if (res == ZTS_ERR_SERVICE) {
         return {ZTCPP_ERROR_REPORT(ServiceError,
-                                   "ZTS_ERR_SERVICE (errno=" + std::to_string(zts_errno) + ")")};
+                                   "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
       }
     }
 
@@ -214,15 +219,15 @@ public:
 
     if (pollres == ZTS_ERR_SOCKET) {
       return {ZTCPP_ERROR_REPORT(SocketError,
-                                 "ZTS_ERR_SOCKET (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
     if (pollres == ZTS_ERR_SERVICE) {
       return {ZTCPP_ERROR_REPORT(ServiceError,
-                                 "ZTS_ERR_SERVICE (errno=" + std::to_string(zts_errno) + ")")};
+                                 "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
     if (pollres != 1 && pollres != 0) {
       return {ZTCPP_ERROR_REPORT(GenericError,
-                                 "Unspecified error from zts_poll (errno=" + std::to_string(zts_errno) + ")")};
+                                 "Unspecified error from zts_poll (zts_errno=" + std::to_string(zts_errno) + ")")};
     }
     if (pollfd.revents & ZTS_POLLNVAL) {
       return {ZTCPP_ERROR_REPORT(SocketError,
@@ -249,6 +254,131 @@ public:
     return {result};
   }
 
+  Result<IpAddress> getLocalIpAddress() const {
+    struct zts_sockaddr_storage localAddress;
+    zts_socklen_t localAddressLen = sizeof(localAddress);
+    const int res = zts_getsockname(_socketID,
+                                    reinterpret_cast<struct zts_sockaddr*>(&localAddress),
+                                    &localAddressLen);
+
+    if (res == ZTS_ERR_OK) {
+      IpAddress result;
+      uint16_t dummyPort;
+      detail::ToIpAddressAndPort(&localAddress, result, dummyPort);
+      return {result};
+    }
+    if (res == ZTS_ERR_SOCKET) {
+      return {ZTCPP_ERROR_REPORT(SocketError,
+                                 "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+    if (res == ZTS_ERR_SERVICE) {
+      return {ZTCPP_ERROR_REPORT(ServiceError,
+                                 "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+    if (res == ZTS_ERR_ARG) {
+      return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                 "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+
+    return {ZTCPP_ERROR_REPORT(GenericError,
+                               "Unknown error (zts_getsockname returned " + std::to_string(res) +
+                               ", zts_errno= " + std::to_string(zts_errno) + ")")};
+  }
+
+  Result<uint16_t> getLocalPort() const {
+    struct zts_sockaddr_storage localAddress;
+    zts_socklen_t localAddressLen = sizeof(localAddress);
+    const int res = zts_getsockname(_socketID,
+                                    reinterpret_cast<struct zts_sockaddr*>(&localAddress),
+                                    &localAddressLen);
+
+    if (res == ZTS_ERR_OK) {
+      IpAddress dummyAddress;
+      uint16_t result;
+      detail::ToIpAddressAndPort(&localAddress, dummyAddress, result);
+      return {result};
+    }
+    if (res == ZTS_ERR_SOCKET) {
+      return {ZTCPP_ERROR_REPORT(SocketError,
+                                 "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+    if (res == ZTS_ERR_SERVICE) {
+      return {ZTCPP_ERROR_REPORT(ServiceError,
+                                 "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+    if (res == ZTS_ERR_ARG) {
+      return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                 "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+
+    return {ZTCPP_ERROR_REPORT(GenericError,
+                               "Unknown error (zts_getsockname returned " + std::to_string(res) +
+                               ", zts_errno= " + std::to_string(zts_errno) + ")")};
+  }
+
+  Result<IpAddress> getRemoteIpAddress() const {
+    struct zts_sockaddr_storage localAddress;
+    zts_socklen_t localAddressLen = sizeof(localAddress);
+    const int res = zts_getpeername(_socketID,
+                                    reinterpret_cast<struct zts_sockaddr*>(&localAddress),
+                                    &localAddressLen);
+
+    if (res == ZTS_ERR_OK) {
+      IpAddress result;
+      uint16_t dummyPort;
+      detail::ToIpAddressAndPort(&localAddress, result, dummyPort);
+      return {result};
+    }
+    if (res == ZTS_ERR_SOCKET) {
+      return {ZTCPP_ERROR_REPORT(SocketError,
+                                 "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+    if (res == ZTS_ERR_SERVICE) {
+      return {ZTCPP_ERROR_REPORT(ServiceError,
+                                 "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+    if (res == ZTS_ERR_ARG) {
+      return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                 "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+
+    return {ZTCPP_ERROR_REPORT(GenericError,
+                               "Unknown error (zts_getsockname returned " + std::to_string(res) +
+                               ", zts_errno= " + std::to_string(zts_errno) + ")")};
+  }
+
+  Result<uint16_t> getRemotePort() const {
+    struct zts_sockaddr_storage localAddress;
+    zts_socklen_t localAddressLen = sizeof(localAddress);
+    const int res = zts_getpeername(_socketID,
+                                    reinterpret_cast<struct zts_sockaddr*>(&localAddress),
+                                    &localAddressLen);
+
+    if (res == ZTS_ERR_OK) {
+      IpAddress dummyAddress;
+      uint16_t result;
+      detail::ToIpAddressAndPort(&localAddress, dummyAddress, result);
+      return {result};
+    }
+    if (res == ZTS_ERR_SOCKET) {
+      return {ZTCPP_ERROR_REPORT(SocketError,
+                                 "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+    if (res == ZTS_ERR_SERVICE) {
+      return {ZTCPP_ERROR_REPORT(ServiceError,
+                                 "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+    if (res == ZTS_ERR_ARG) {
+      return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                 "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
+    }
+
+    return {ZTCPP_ERROR_REPORT(GenericError,
+                               "Unknown error (zts_getpeername returned " + std::to_string(res) +
+                               ", zts_errno= " + std::to_string(zts_errno) + ")")};
+  }
+
+#if 0
   EmptyResult setNonBlocking(bool aNonBlocking) {
     int flags = zts_fcntl(_socketID, ZTS_F_GETFL, 0);
     if (flags < 0) {
@@ -280,6 +410,7 @@ public:
     }
     return {(res & ZTS_O_NONBLOCK) != 0};
   }
+#endif
 
 private:
   AddressFamily getAddressFamily() {
@@ -343,6 +474,10 @@ Result<std::size_t> Socket::receiveFrom(void* aDestinationBuffer,
   return _impl->receiveFrom(aDestinationBuffer, aDestinationBufferByteSize, aSenderAddress, aSenderPort);
 }
 
+bool Socket::isOpen() const {
+  return _impl->isOpen();
+}
+
 EmptyResult Socket::close() {
   return _impl->close();
 }
@@ -352,12 +487,20 @@ Result<int> Socket::pollEvents(PollEventBitmask::Enum aInterestedIn,
   return _impl->pollEvents(aInterestedIn, aMaxTimeToWait);
 }
 
-EmptyResult Socket::setNonBlocking(bool aNonBlocking) {
-  return _impl->setNonBlocking(aNonBlocking);
+Result<IpAddress> Socket::getLocalIpAddress() const {
+  return _impl->getLocalIpAddress();
 }
 
-Result<bool> Socket::getNonBlocking() const {
-  return _impl->getNonBlocking();
+Result<uint16_t> Socket::getLocalPort() const {
+  return _impl->getLocalPort();
+}
+
+Result<IpAddress> Socket::getRemoteIpAddress() const {
+  return _impl->getRemoteIpAddress();
+}
+
+Result<uint16_t> Socket::getRemotePort() const {
+  return _impl->getRemotePort();
 }
 
 ZTCPP_NAMESPACE_END
