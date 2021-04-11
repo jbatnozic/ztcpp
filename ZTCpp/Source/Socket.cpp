@@ -196,22 +196,31 @@ public:
     return EmptyResultOK();
   }
 
-  Result<int> pollEvents(std::chrono::milliseconds aMaxTimeToWait) const {
+  Result<int> pollEvents(PollEventBitmask::Enum aInterestedIn,
+                         std::chrono::milliseconds aMaxTimeToWait) const {
+    if (aInterestedIn == 0) {
+      return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                 "aInterestedIn was 0")};
+    }
+
 		struct zts_pollfd pollfd;
     pollfd.fd = _socketID;
-    pollfd.events = ZTS_POLLIN | ZTS_POLLOUT | ZTS_POLLPRI;
+    pollfd.events = 0;
+    pollfd.events |= ((aInterestedIn & PollEventBitmask::ReadyToReceive) != 0)             ? ZTS_POLLIN  : 0;
+    pollfd.events |= ((aInterestedIn & PollEventBitmask::ReadyToSend) != 0)                ? ZTS_POLLOUT : 0;
+    pollfd.events |= ((aInterestedIn & PollEventBitmask::ReadyToReceivePriorityData) != 0) ? ZTS_POLLPRI : 0;
 
-    const int res = zts_poll(&pollfd, 1, static_cast<int>(aMaxTimeToWait.count()));
+    const int pollres = zts_poll(&pollfd, 1, static_cast<int>(aMaxTimeToWait.count()));
 
-    if (res == ZTS_ERR_SOCKET) {
+    if (pollres == ZTS_ERR_SOCKET) {
       return {ZTCPP_ERROR_REPORT(SocketError,
                                  "ZTS_ERR_SOCKET (errno=" + std::to_string(zts_errno) + ")")};
     }
-    if (res == ZTS_ERR_SERVICE) {
+    if (pollres == ZTS_ERR_SERVICE) {
       return {ZTCPP_ERROR_REPORT(ServiceError,
                                  "ZTS_ERR_SERVICE (errno=" + std::to_string(zts_errno) + ")")};
     }
-    if (res != 1) {
+    if (pollres != 1 && pollres != 0) {
       return {ZTCPP_ERROR_REPORT(GenericError,
                                  "Unspecified error from zts_poll (errno=" + std::to_string(zts_errno) + ")")};
     }
@@ -229,9 +238,13 @@ public:
     }
 
     int result = 0;
-    if (pollfd.revents & ZTS_POLLIN)  result |= PollEventBitmask::ReadyToReceive;
-    if (pollfd.revents & ZTS_POLLOUT) result |= PollEventBitmask::ReadyToSend;
-    if (pollfd.revents & ZTS_POLLPRI) result |= PollEventBitmask::ReadyToReceivePriorityData;
+    // If zts_poll returned 0, it means the socket wasn't 
+    // ready for any of the events we were interested in
+    if (pollres != 0) {
+      if (pollfd.revents & ZTS_POLLIN)  result |= PollEventBitmask::ReadyToReceive;
+      if (pollfd.revents & ZTS_POLLOUT) result |= PollEventBitmask::ReadyToSend;
+      if (pollfd.revents & ZTS_POLLPRI) result |= PollEventBitmask::ReadyToReceivePriorityData;
+    }
 
     return {result};
   }
@@ -334,8 +347,9 @@ EmptyResult Socket::close() {
   return _impl->close();
 }
 
-Result<int> Socket::pollEvents(std::chrono::milliseconds aMaxTimeToWait) const {
-  return _impl->pollEvents(aMaxTimeToWait);
+Result<int> Socket::pollEvents(PollEventBitmask::Enum aInterestedIn,
+                               std::chrono::milliseconds aMaxTimeToWait) const {
+  return _impl->pollEvents(aInterestedIn, aMaxTimeToWait);
 }
 
 EmptyResult Socket::setNonBlocking(bool aNonBlocking) {

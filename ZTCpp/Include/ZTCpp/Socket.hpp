@@ -27,7 +27,10 @@ struct PollEventBitmask {
   enum Enum {
     ReadyToReceive             = 1, //! Can call receive() or receiveFrom() without blocking
     ReadyToSend                = 2, //! Can call send() or sendTo() without blocking
-    ReadyToReceivePriorityData = 4  //! Same as ReadyToReceive but for data deemed 'more important'
+    ReadyToReceivePriorityData = 4, //! Same as ReadyToReceive but for data deemed 'more important'
+
+    ReadyToReceiveAny          = ReadyToReceive | ReadyToReceivePriorityData,
+    AnyEvent                   = ReadyToReceiveAny | ReadyToSend
   };
 };
 
@@ -65,7 +68,8 @@ public:
 
   //! On success, compare with PollEventBitmask::Enum to see which events have occurred
   //! If aMaxTimeToWait is 0, return immediately. If it is negative, waits indefinitely until an event occurs
-  Result<int> pollEvents(std::chrono::milliseconds aMaxTimeToWait = std::chrono::milliseconds{0}) const;
+  Result<int> pollEvents(PollEventBitmask::Enum aInterestedIn = PollEventBitmask::AnyEvent,
+                         std::chrono::milliseconds aMaxTimeToWait = std::chrono::milliseconds{0}) const;
 
   Result<IpAddress> getLocalIpAddress() const; // TODO
   Result<uint16_t> getLocalPort() const; // TODO

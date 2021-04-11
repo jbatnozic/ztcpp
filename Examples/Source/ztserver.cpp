@@ -159,10 +159,10 @@ try {
 
 	printf("Receiving data...\n");
 	for (int i = 0; i < 100; i += 1) {
-		const auto pollres = socket.pollEvents();
+		const auto pollres = socket.pollEvents(zt::PollEventBitmask::ReadyToReceiveAny);
 		ZTCPP_THROW_ON_ERROR(pollres, std::runtime_error);
 		const bool readyToReceive = 
-			(*pollres & (zt::PollEventBitmask::ReadyToReceive | zt::PollEventBitmask::ReadyToReceivePriorityData)) != 0;
+			(*pollres & zt::PollEventBitmask::ReadyToReceiveAny) != 0;
 
 		if (readyToReceive) {
 			zt::IpAddress remoteIp;
