@@ -27,8 +27,9 @@ struct PollEventBitmask {
   enum Enum {
     ReadyToReceive             = 1, //! Can call receive() or receiveFrom() without blocking
     ReadyToSend                = 2, //! Can call send() or sendTo() without blocking
-    ReadyToReceivePriorityData = 4, //! Same as ReadyToReceive but for data deemed 'more important'
+    ReadyToReceivePriorityData = 4, //! Same as ReadyToReceive but for out-of-bound data
 
+    ReadyToAccept              = ReadyToReceive, //! Can call accept() without blocking
     ReadyToReceiveAny          = ReadyToReceive | ReadyToReceivePriorityData,
     AnyEvent                   = ReadyToReceiveAny | ReadyToSend
   };
@@ -49,9 +50,14 @@ public:
   EmptyResult connect(const IpAddress& aRemoteIpAddress,
                       uint16_t aRemotePortInHostOrder);
 
-  EmptyResult listen(); // TODO
+  //! Set the socket in a listening state
+  EmptyResult listen(std::size_t aMaxQueueSize); // TODO
 
-  EmptyResult accept(); // TODO
+  //! Accept a new connection and return a new socket to handle that new connection.
+  //! Blocks until a new connection is available (you can pollEvent for PollEventBitmask::ReadyToAccept
+  //! if you want to avoid blocking).
+  //! Only works for Stream (TCP) sockets and always fails on others.
+  Result<Socket> accept(); // TODO
 
   // TODO: send()
 
