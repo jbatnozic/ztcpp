@@ -7,7 +7,7 @@
 #include <thread>
 #include <iostream>
 
-#include <Ztcpp.hpp>
+#include <ZTCpp.hpp>
 
 namespace zt = jbatnozic::ztcpp;
 
