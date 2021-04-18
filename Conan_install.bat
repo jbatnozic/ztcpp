@@ -1,2 +1,2 @@
-conan install . -if Build/ZTCpp-x64-Debug/   -s build_type=Debug   --profile=default --build=outdated
-conan install . -if Build/ZTCpp-x64-Release/ -s build_type=Release --profile=default --build=outdated
+conan install . -if Build/ZTCpp-x64-Debug/   -s build_type=Debug   --profile=default --build=outdated -s compiler.cppstd=17
+conan install . -if Build/ZTCpp-x64-Release/ -s build_type=Release --profile=default --build=outdated -s compiler.cppstd=17
