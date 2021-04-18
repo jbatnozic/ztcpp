@@ -22,7 +22,7 @@ struct EventCode {
     RemovedIPv6 = 263
   };
 
-  //! TODO
+  //! Events about networks that the local node tries to join
   enum class Network {
     NotFound                = 210,
     ClientTooOld            = 211,
@@ -36,7 +36,7 @@ struct EventCode {
     Update                  = 219
   };
 
-  //! TODO
+  //! ?
   enum class NetworkInterface {
     Up       = 230,
     Down     = 231,
@@ -45,13 +45,13 @@ struct EventCode {
     LinkDown = 234
   };
 
-  //! TODO
+  //! Events about the local ZeroTier networking stack
   enum class NetworkStack {
     Up   = 220,
     Down = 221
   };
 
-  //! TODO
+  //! Events about the local node
   enum class Node {
     Up                 = 200,
     Online             = 201,
@@ -62,7 +62,7 @@ struct EventCode {
     NormalTermination  = 206
   };
 
-  //! TODO
+  //! Events about other nodes on the same network
   enum class Peer {
     Direct         = 240,
     Relay          = 241,
@@ -71,7 +71,7 @@ struct EventCode {
     PathDead       = 244
   };
 
-  //! TODO
+  //! ?
   enum class Route {
     Added   = 250,
     Removed = 251

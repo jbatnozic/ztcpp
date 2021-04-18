@@ -143,18 +143,26 @@ try {
 
   // Bring up ZeroTier service and join network
 
-  int err = ZTS_ERR_OK;
-
-  //zts_allow_network_caching(1);
-  //zts_allow_peer_caching(1);
-  //zts_allow_local_conf(1);
+  printf("Configuring ZeroTier service...\n");
+  {
+    const auto res = zt::AllowNetworkCaching(true);
+    ZTCPP_THROW_ON_ERROR(res, std::runtime_error);
+  }
+  {
+    const auto res = zt::AllowPeerCaching(true);
+    ZTCPP_THROW_ON_ERROR(res, std::runtime_error);
+  }
+  {
+    const auto res = zt::AllowLocalConf(true);
+    ZTCPP_THROW_ON_ERROR(res, std::runtime_error);
+  }
 
   printf("This node's identity is stored in %s\n", identityPath.c_str());
 
   printf("Starting ZeroTier service...\n");
-  if ((err = zt::StartZeroTierService(identityPath, ztServicePort)) != ZTS_ERR_OK) {
-    printf("Unable to start service, error = %d. Exiting.\n", err);
-    exit(1);
+  {
+    const auto res = zt::StartService(identityPath, ztServicePort);
+    ZTCPP_THROW_ON_ERROR(res, std::runtime_error);
   }
 
   printf("Waiting for node to come online...\n");
@@ -164,11 +172,10 @@ try {
   
   printf("Joining network %llx\n", nwid);
   printf("Don't forget to authorize this device in my.zerotier.com or the web API!\n");
-  if ((err = zt::JoinNetwork(nwid)) != ZTS_ERR_OK) {
-    printf("Unable to join network, error = %d. Exiting.\n", err);
-    exit(1);
+  {
+    const auto res = zt::JoinNetwork(nwid);
+    ZTCPP_THROW_ON_ERROR(res, std::runtime_error);
   }
-  
   
   while (localNode.networksJoinedCount <= 0) {
     std::this_thread::sleep_for(std::chrono::milliseconds{50});
@@ -211,7 +218,7 @@ try {
   }
 
   printf("Shutting down service\n");
-  zt::StopZeroTierService();
+  zt::StopService();
   std::this_thread::sleep_for(std::chrono::milliseconds{1000});
   zt::SetEventHandler(nullptr);
   return EXIT_SUCCESS;
@@ -219,14 +226,14 @@ try {
 catch (std::exception& ex) {
   printf("Exception caught: %s\n", ex.what());
   printf("Shutting down service\n");
-  zt::StopZeroTierService();
+  zt::StopService();
   std::this_thread::sleep_for(std::chrono::milliseconds{1000});
   zt::SetEventHandler(nullptr);
 }
 catch (...) {
   printf("Unknown exception caught\n");
   printf("Shutting down service\n");
-  zt::StopZeroTierService();
+  zt::StopService();
   std::this_thread::sleep_for(std::chrono::milliseconds{1000});
   zt::SetEventHandler(nullptr);
 }

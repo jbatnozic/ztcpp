@@ -154,7 +154,7 @@ uint32_t NetworkDetails::getMulticastSubscriptionCount() const {
 
 // *** NetworkStackDetails ***
 
-// No methods for now
+// (No methods for now)
 
 // *** NodeDetails ***
 
@@ -418,40 +418,6 @@ ZTCPP_API IEventHandler* GetEventHandler() {
 // Utility                                                                  //
 //////////////////////////////////////////////////////////////////////////////
 
-#if 0
-struct EventCode {
-  //! TODO
-  enum class NetworkInterface {
-    Up       = 230,
-    Down     = 231,
-    Removed  = 232,
-    LinkUp   = 233,
-    LinkDown = 234
-  };
-
-  //! TODO
-  enum class NetworkStack {
-    Up   = 220,
-    Down = 221
-  };
-
-  //! TODO
-  enum class Peer {
-    Direct         = 240,
-    Relay          = 241,
-    Unreachable    = 242,
-    PathDiscovered = 243,
-    PathDead       = 244
-  };
-
-  //! TODO
-  enum class Route {
-    Added   = 250,
-    Removed = 251
-  };
-};
-#endif
-
 ZTCPP_API std::string EventDescription(EventCode::Address aEventCode, const AddressDetails* aDetails) {
   std::stringstream ss;
 
@@ -632,12 +598,56 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
 
 ZTCPP_API std::string EventDescription(EventCode::NetworkInterface aEventCode,
                                        const NetworkInterfaceDetails* aDetails) {
-  return "Network interface event: <description not implemented>";
+  std::stringstream ss;
+
+  switch (aEventCode) {
+  case EventCode::NetworkInterface::Up:
+    ss << "Network interface event: Up (ZTS_EVENT_NETIF_UP)";
+    break;
+
+  case EventCode::NetworkInterface::Down:
+    ss << "Network interface event: Down (ZTS_EVENT_NETIF_DOWN)";
+    break;
+
+  case EventCode::NetworkInterface::Removed:
+    ss << "Network interface event: Removed (ZTS_EVENT_NETIF_REMOVED)";
+    break;
+
+  case EventCode::NetworkInterface::LinkUp:
+    ss << "Network interface event: LinkUp (ZTS_EVENT_NETIF_LINK_UP)";
+    break;
+
+  case EventCode::NetworkInterface::LinkDown:
+    ss << "Network interface event: LinkDown (ZTS_EVENT_NETIF_LINK_DOWN)";
+    break;
+
+  default:
+    ss << "Network interface event: Unknown (?)";
+    break;
+  }
+
+  return ss.str();
 }
 
 ZTCPP_API std::string EventDescription(EventCode::NetworkStack aEventCode,
                                        const NetworkStackDetails* aDetails) {
-  return "Network stack event: <description not implemented>";
+  std::stringstream ss;
+
+  switch (aEventCode) {
+  case EventCode::NetworkStack::Up:
+    ss << "Networking stack event: Up (ZTS_EVENT_STACK_UP)";
+    break;
+
+  case EventCode::NetworkStack::Down:
+    ss << "Networking stack event: Down (ZTS_EVENT_STACK_DOWN)";
+    break;
+
+  default:
+    ss << "Networking stack event: Unknown (?)";
+    break;
+  }
+
+  return ss.str();
 }
 
 ZTCPP_API std::string EventDescription(EventCode::Node aEventCode, const NodeDetails* aDetails) {
@@ -659,8 +669,9 @@ ZTCPP_API std::string EventDescription(EventCode::Node aEventCode, const NodeDet
     break;
 
   case EventCode::Node::Offline:
-    ss << "Node event: Offline (ZTS_EVENT_NODE_OFFLINE)\n";
-    ss << "    Comment: Check your physical Internet connection, router, firewall, etc. What ports are you blocking?";
+    ss << "Node event: Offline (ZTS_EVENT_NODE_OFFLINE)";
+    ss << "\n    Comment: Check your physical Internet connection, "
+          "router, firewall, etc. What ports are you blocking?";
     break;
 
   case EventCode::Node::Down:
@@ -687,11 +698,102 @@ ZTCPP_API std::string EventDescription(EventCode::Node aEventCode, const NodeDet
 }
 
 ZTCPP_API std::string EventDescription(EventCode::Peer aEventCode, const PeerDetails* aDetails) {
-  return "Peer event: <description not implemented>";
+  std::stringstream ss;
+
+#define PEER_ROLE_STR(_role_) \
+  (((_role_) == PeerRole::Leaf)   ? "Leaf (Normal node)" : \
+   ((_role_) == PeerRole::Moon)   ? "Moon (Root server / P2P connection orchestrator)" : \
+   ((_role_) == PeerRole::Planet) ? "Planet (Root server / P2P connection orchestrator)" : "<Unknown>")
+
+  switch (aEventCode) {
+  case EventCode::Peer::Direct:
+    ss << "Peer event: Direct (ZTS_EVENT_PEER_DIRECT)";
+    if (aDetails) {
+      ss << "\n    Node info: ID=" << std::hex << aDetails->getAddress()
+         << ", Role=" << PEER_ROLE_STR(aDetails->getRole());
+    }
+    else {
+      ss << "\n    [Node details unavailable]";
+    }
+    ss << "\n    Comment: A direct path is known to this node.";
+    break;
+
+  case EventCode::Peer::Relay:
+    ss << "Peer event: Relay (ZTS_EVENT_PEER_RELAY)";
+    if (aDetails) {
+      ss << "\n    Node info: ID=" << std::hex << aDetails->getAddress()
+        << ", Role=" << PEER_ROLE_STR(aDetails->getRole());
+    }
+    else {
+      ss << "\n    [Node details unavailable]";
+    }
+    ss << "\n    Comment: No direct path is known to this node.";
+    break;
+
+  case EventCode::Peer::Unreachable:
+    ss << "Peer event: Unreachable (ZTS_EVENT_PEER_UNREACHABLE)";
+    if (aDetails) {
+      ss << "\n    Node info: ID=" << std::hex << aDetails->getAddress()
+        << ", Role=" << PEER_ROLE_STR(aDetails->getRole());
+    }
+    else {
+      ss << "\n    [Node details unavailable]";
+    }
+    ss << "\n    Comment: This node has become unreachable.";
+    break;
+
+  case EventCode::Peer::PathDiscovered:
+    ss << "Peer event: PathDiscovered (ZTS_EVENT_PEER_PATH_DISCOVERED)";
+    if (aDetails) {
+      ss << "\n    Node info: ID=" << std::hex << aDetails->getAddress()
+        << ", Role=" << PEER_ROLE_STR(aDetails->getRole());
+    }
+    else {
+      ss << "\n    [Node details unavailable]";
+    }
+    ss << "\n    Comment: A new direct path to this node was discovered.";
+    break;
+
+  case EventCode::Peer::PathDead:
+    ss << "Peer event: PathDead (ZTS_EVENT_PEER_PATH_DEAD)";
+    if (aDetails) {
+      ss << "\n    Node info: ID=" << std::hex << aDetails->getAddress()
+        << ", Role=" << PEER_ROLE_STR(aDetails->getRole());
+    }
+    else {
+      ss << "\n    [Node details unavailable]";
+    }
+    ss << "\n    Comment: A direct path to this node has died.";
+    break;
+
+  default:
+    ss << "Peer event: Unknown (?)";
+    break;
+  }
+
+#undef PEER_ROLE_STR
+
+  return ss.str();
 }
 
 ZTCPP_API std::string EventDescription(EventCode::Route aEventCode, const RouteDetails* aDetails) {
-  return "Route event: <description not implemented>";
+  std::stringstream ss;
+
+  switch (aEventCode) {
+  case EventCode::Route::Added:
+    ss << "Route event: Added (ZTS_EVENT_ROUTE_ADDED)";
+    break;
+
+  case EventCode::Route::Removed:
+    ss << "Route event: Removed (ZTS_EVENT_ROUTE_REMOVED)";
+    break;
+
+  default:
+    ss << "Route event: Unknown (?)";
+    break;
+  }
+
+  return ss.str();
 }
 
 ZTCPP_NAMESPACE_END

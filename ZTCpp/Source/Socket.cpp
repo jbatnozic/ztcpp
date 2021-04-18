@@ -46,8 +46,6 @@ public:
   }
 
   EmptyResult bind(const IpAddress& aLocalIpAddress, uint16_t aLocalPortInHostOrder) {
-    // TODO (check valid)
-
     if (!aLocalIpAddress.isValid()) {
       return {ZTCPP_ERROR_REPORT(ArgumentError,
                                  "aLocalIpAddress is invalid")};
@@ -88,8 +86,6 @@ public:
                              std::size_t aDataByteSize,
                              const IpAddress& aRemoteIpAddress,
                              uint16_t aLocalPortInHostOrder) {
-    // TODO (check valid)
-
     if (aData == nullptr || aDataByteSize == 0) {
       return {ZTCPP_ERROR_REPORT(ArgumentError,
                                  "aData is null or aDataByteSize == 0")};
@@ -135,8 +131,6 @@ public:
                                   std::size_t aDestinationBufferByteSize,
                                   IpAddress& aSenderAddress,
                                   uint16_t& aSenderPort) {
-    // TODO (check valid)
-
     if (aDestinationBuffer == nullptr || aDestinationBufferByteSize == 0) {
       return {ZTCPP_ERROR_REPORT(ArgumentError,
                                  "aDestinationBuffer is null or aDestinationBufferByteSize == 0")};
@@ -158,10 +152,6 @@ public:
       return {static_cast<std::size_t>(byteCount)};
     }
     if (byteCount == ZTS_ERR_SOCKET) {
-      // TODO Temporary
-      if (zts_errno == 140) {
-        return {static_cast<std::size_t>(0)};
-      }
       return {ZTCPP_ERROR_REPORT(SocketError,
                                  "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
     }

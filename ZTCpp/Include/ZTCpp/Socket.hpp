@@ -23,6 +23,7 @@ enum class SocketType {
   Raw       //! Raw
 };
 
+//! Used for pollEvents() methods of the Socket class (see below).
 struct PollEventBitmask {
   enum Enum {
     ReadyToReceive             = 1, //! Can call receive() or receiveFrom() without blocking
@@ -105,11 +106,12 @@ public:
   //! and receive traffic. Once close() is called, isOpen() will return false again.
   bool isOpen() const;
 
-
+  //! Close the socket. This method returns the socket into its initial state.
+  //! The socket can become functional again if you call init().
   EmptyResult close();
 
   // Control commands
-  // TODO RDONLY, WRONLY
+  // TODO - RDONLY, WRONLY, send/recv flags...
 
 private:
   class Impl;

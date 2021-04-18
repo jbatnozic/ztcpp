@@ -19,6 +19,7 @@ struct ZTCPP_API RawIPv6Address {
 
 class ZTCPP_API IpAddress {
 public:
+  //! Constructs an invalid IpAddress.
   IpAddress();
 
   static IpAddress ipv4Unspecified();
