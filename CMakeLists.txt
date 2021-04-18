@@ -15,4 +15,7 @@ conan_basic_setup(TARGETS)
 # ===== ADD MODULES =====
 
 add_subdirectory("ZTCpp")
-add_subdirectory("Examples")
+
+if(NOT ZTCPP_SKIP_EXAMPLES)
+  add_subdirectory("Examples")
+endif()
