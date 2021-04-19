@@ -22,4 +22,7 @@ class ZtcppTestConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             os.chdir("bin")
-            self.run("DYLD_LIBRARY_PATH=$(pwd) .%sexample" % os.sep)
+            if self.settings.os == "Macos":
+                self.run("DYLD_LIBRARY_PATH=$(pwd) .%sexample" % os.sep)
+            else:
+                self.run(".%sexample" % os.sep)

@@ -3,7 +3,7 @@
 
 class ZtcppConan(ConanFile):
     name = "ztcpp"
-    version = "1.1.0"
+    version = "1.1.1"
 
     # Information for humans
     license = "MIT"
