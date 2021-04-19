@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#if defined(_WIN32)
+#ifdef _WIN32
   #ifndef ZTCPP_STATIC
     #ifdef ZTCPP_EXPORT
       #define ZTCPP_API __declspec(dllexport)
@@ -20,10 +20,10 @@
 #define ZTCPP_NAMESPACE_BEGIN namespace jbatnozic { namespace ztcpp {
 #define ZTCPP_NAMESPACE_END   }}
 
-#ifdef _WIN32
+#ifdef _MSC_VER
   #define ZTCPP_PRETTY_FUNCTION __FUNCSIG__
 #else
-  #define ZTCPP_PRETTY_FUNCTION __PRETTY__FUNCTION__
+  #define ZTCPP_PRETTY_FUNCTION __PRETTY_FUNCTION__
 #endif
 
 ZTCPP_NAMESPACE_BEGIN

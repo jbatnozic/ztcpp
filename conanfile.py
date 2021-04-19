@@ -3,7 +3,7 @@
 
 class ZtcppConan(ConanFile):
     name = "ztcpp"
-    version = "1.0.0"
+    version = "1.1.0"
 
     # Information for humans
     license = "MIT"
@@ -14,17 +14,18 @@ class ZtcppConan(ConanFile):
     # Information for computers
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
+        "shared": [True],
         "fPIC": [True, False]
     }
     default_options = {
-        "shared": False, "fPIC": True
+        "shared": True,
+        "fPIC": True
     }
     generators = "cmake"
 
     exports_sources = ['CMakeLists.txt', 'ZTCpp/*']
 
-    requires = "libzt/1.0.1@jbatnozic/stable"
+    requires = "libzt/1.1.0@jbatnozic/stable"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,5 +51,5 @@ class ZtcppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ztcpp"]
-        if self.options.shared:
+        if not self.options.shared:
             self.cpp_info.defines = ["ZTCPP_STATIC"]

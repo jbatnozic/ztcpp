@@ -3,7 +3,7 @@ User-friendly C++ wrapper over [libzt](https://github.com/zerotier/libzt)'s C in
 
 Also available as [Conan](https://conan.io/) package.
 
-Latest version: `1.0.0`
+Latest version: `1.1.0`
 
 **Note:** ZTCpp does not currently expose all features that libzt offers. Feel free to make a feature request
 or a PR if you need something that's missing.
@@ -40,7 +40,7 @@ if it is included in the profile you're using.
 ## Consuming the package
 Consumed through a conanfile (.txt or .py) like any other Conan package. Supports both `build-type`s (Debug and Release) as you'd excpect.
 
-The only supported options are `fPIC` (except on Windows) and `shared`. Both are boolean (True/False).
+The only supported options are `fPIC` (except on Windows) and `shared`. Both are boolean (True/False). Note: due to a defect in the CMake files, builds with `ztcpp:shared=False` will not work for now.
 
 ## Building without Conan
 While building without Conan is not currently officially supported, it is possible, but requires some modifications to the CMake files:
