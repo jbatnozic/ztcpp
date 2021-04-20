@@ -47,7 +47,10 @@ public:
   //! Note: The socket will work even if bound to an unspecified address.
   EmptyResult bind(const IpAddress& aLocalIpAddress, uint16_t aLocalPortInHostOrder);
 
-  //! NOT YET IMPLEMENTED (TODO)
+  //! Connects the socket to a remote host. Mandatory for TCP sockets before use.
+  //! For UDP sockets, the only thing it does is enable calling() send and receive()
+  //! instead of sendTo() and receiveFrom(), and it will fill out the missing
+  //! information automatically.
   EmptyResult connect(const IpAddress& aRemoteIpAddress,
                       uint16_t aRemotePortInHostOrder);
 
@@ -55,36 +58,48 @@ public:
   EmptyResult listen(std::size_t aMaxQueueSize); // TODO
 
   //! Accept a new connection and return a new socket to handle that new connection.
-  //! Blocks until a new connection is available (you can pollEvent for PollEventBitmask::ReadyToAccept
-  //! if you want to avoid blocking).
+  //! Blocks until a new connection is available (you can pollEvent for 
+  //! PollEventBitmask::ReadyToAccept if you want to avoid blocking).
   //! Only works for Stream (TCP) sockets and always fails on others.
   Result<Socket> accept(); // TODO
 
-  // TODO: send()
+  //! Sends data to a remote host.
+  //! On success, return value = number of bytes sent
+  Result<std::size_t> send(const void* aData,
+                           std::size_t aDataByteSize);
 
+  //! Sends data to a remote host.
+  //! On success, return value = number of bytes sent
   Result<std::size_t> sendTo(const void* aData,
                              std::size_t aDataByteSize,
                              const IpAddress& aRemoteIpAddress,
                              uint16_t aRemotePortInHostOrder);
 
-  // TODO: receive()
-
-  //! If the destination buffer is not large enough to hold the whole message, that was
+  //! Receive data from the a remote host.
+  //! If the destination buffer is not large enough to hold the whole message that was
   //! received, it will be truncanted to fit and no error will be reported. Thus, unless
   //! you know in advance what kind of messages will be received, the safest approach 
   //! would be to provide as large a buffer as you can. Note that the theoretical limit
   //! for both TCP and UDP packet size is 64kB, so anything more that that is a certain 
   //! waste of memory.
+  //! On successs, return value = number of bytes received (written to the buffer)
+  Result<std::size_t> receive(void* aDestinationBuffer,
+                              std::size_t aDestinationBufferByteSize);
+
+  //! Same as receive() but also, on success, reports the sender's IP and port through 
+  //! the last two arguments.
   Result<std::size_t> receiveFrom(void* aDestinationBuffer,
                                   std::size_t aDestinationBufferByteSize,
                                   IpAddress& aSenderAddress,
                                   uint16_t& aSenderPort);
 
-  //! On success, compare with PollEventBitmask::Enum to see which events have occurred
-  //! Blocks until any event marked in aInterestedIn occurs, or until aMaxTimeToWait has passed
-  //! If aMaxTimeToWait is 0, return immediately. If it is negative, waits indefinitely until an event occurs
-  Result<int> pollEvents(PollEventBitmask::Enum aInterestedIn = PollEventBitmask::AnyEvent,
-                         std::chrono::milliseconds aMaxTimeToWait = std::chrono::milliseconds{0}) const;
+  //! On success, compare with PollEventBitmask::Enum to see which events have occurred.
+  //! Blocks until any event marked in aInterestedIn occurs, or until aMaxTimeToWait has
+  //! passed. If aMaxTimeToWait is 0, return immediately. If it is negative, waits 
+  //! indefinitely until an event occurs
+  Result<int> pollEvents(
+      PollEventBitmask::Enum aInterestedIn = PollEventBitmask::AnyEvent,
+      std::chrono::milliseconds aMaxTimeToWait = std::chrono::milliseconds{0}) const;
 
   //! Return the address to which the socket was bound.
   //! Will return an all-zero address for an unbound socket.

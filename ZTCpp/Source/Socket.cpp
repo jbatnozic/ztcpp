@@ -7,6 +7,10 @@
 
 ZTCPP_NAMESPACE_BEGIN
 
+///////////////////////////////////////////////////////////////////////////
+// SOCKET IMPL                                                           //
+///////////////////////////////////////////////////////////////////////////
+
 class Socket::Impl {
 public:
   Impl() = default;
@@ -78,8 +82,80 @@ public:
     }
 
     return {ZTCPP_ERROR_REPORT(GenericError,
-                               "Unknown error (zts_sendto returned " + std::to_string(res) +
+                               "Unknown error (zts_bind returned " + std::to_string(res) +
                                ", zts_errno= " + std::to_string(zts_errno) + ")")};
+  }
+
+  EmptyResult connect(const IpAddress& aRemoteIpAddress,
+                      uint16_t aRemotePortInHostOrder) {
+      if (aRemotePortInHostOrder == 0) {
+          return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                     "0 is not a valid port to connect to")};
+      }
+      if (!aRemoteIpAddress.isValid()) {
+          return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                     "aRemoteIpAddress is invalid")};
+      }
+      if (aRemoteIpAddress.getAddressFamily() != getAddressFamily()) {
+          return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                     "aRemoteIpAddress is of wrong address family")};
+      }
+
+      const auto sockaddr = detail::ToSockaddr(aRemoteIpAddress, aRemotePortInHostOrder);
+      const auto res = zts_connect(_socketID,
+                                   reinterpret_cast<const struct zts_sockaddr*>(&sockaddr),
+                                   sizeof(sockaddr));
+
+      if (res == ZTS_ERR_OK) {
+          return EmptyResultOK();
+      }
+
+      if (res == ZTS_ERR_SOCKET) {
+          return {ZTCPP_ERROR_REPORT(SocketError,
+                                     "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+      if (res == ZTS_ERR_SERVICE) {
+          return {ZTCPP_ERROR_REPORT(ServiceError,
+                                     "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+      if (res == ZTS_ERR_ARG) {
+          return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                     "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+
+      return {ZTCPP_ERROR_REPORT(GenericError,
+                                 "Unknown error (zts_connect returned " + std::to_string(res) +
+                                 ", zts_errno= " + std::to_string(zts_errno) + ")")};
+  }
+
+  Result<std::size_t> send(const void* aData,
+                           std::size_t aDataByteSize) {
+      if (aData == nullptr || aDataByteSize == 0) {
+          return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                     "aData is null or aDataByteSize == 0")};
+      }
+
+      const auto byteCount = zts_send(_socketID, aData, aDataByteSize, 0);
+
+      if (byteCount == static_cast<decltype(byteCount)>(aDataByteSize)) {
+          return {aDataByteSize};
+      }
+      if (byteCount == ZTS_ERR_SOCKET) {
+          return {ZTCPP_ERROR_REPORT(SocketError,
+                                     "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+      if (byteCount == ZTS_ERR_SERVICE) {
+          return {ZTCPP_ERROR_REPORT(ServiceError,
+                                     "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+      if (byteCount == ZTS_ERR_ARG) {
+          return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                     "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+
+      return {ZTCPP_ERROR_REPORT(GenericError,
+                                 "Unknown error (zts_send returned " + std::to_string(byteCount) +
+                                 ", zts_errno= " + std::to_string(zts_errno) + ")")};
   }
 
   Result<std::size_t> sendTo(const void* aData,
@@ -125,6 +201,39 @@ public:
     return {ZTCPP_ERROR_REPORT(GenericError,
                                "Unknown error (zts_sendto returned " + std::to_string(byteCount) +
                                ", zts_errno= " + std::to_string(zts_errno) + ")")};
+  }
+
+  Result<std::size_t> receive(void* aDestinationBuffer,
+                              std::size_t aDestinationBufferByteSize) {
+      if (aDestinationBuffer == nullptr || aDestinationBufferByteSize == 0) {
+          return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                     "aDestinationBuffer is null or aDestinationBufferByteSize == 0")};
+      }
+
+      struct zts_sockaddr_storage senderSockaddr;
+      zts_socklen_t senderSockaddrLen = sizeof(senderSockaddr);
+
+      const auto byteCount = zts_recv(_socketID, aDestinationBuffer, aDestinationBufferByteSize, 0);
+
+      if (byteCount > 0) {
+          return {static_cast<std::size_t>(byteCount)};
+      }
+      if (byteCount == ZTS_ERR_SOCKET) {
+          return {ZTCPP_ERROR_REPORT(SocketError,
+                                     "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+      if (byteCount == ZTS_ERR_SERVICE) {
+          return {ZTCPP_ERROR_REPORT(ServiceError,
+                                     "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+      if (byteCount == ZTS_ERR_ARG) {
+          return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                     "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+
+      return {ZTCPP_ERROR_REPORT(GenericError,
+                                 "Unknown error (zts_recvfrom returned " + std::to_string(byteCount) +
+                                 ", zts_errno= " + std::to_string(zts_errno) + ")")};
   }
 
   Result<std::size_t> receiveFrom(void* aDestinationBuffer,
@@ -440,6 +549,10 @@ Socket::Socket()
 {
 }
 
+///////////////////////////////////////////////////////////////////////////
+// SOCKET                                                                //
+///////////////////////////////////////////////////////////////////////////
+
 Socket::~Socket() = default;
 
 EmptyResult Socket::init(SocketDomain aSocketDomain, SocketType aSocketType) {
@@ -450,11 +563,26 @@ EmptyResult Socket::bind(const IpAddress & aLocalIpAddress, uint16_t aLocalPortI
   return _impl->bind(aLocalIpAddress, aLocalPortInHostOrder);
 }
 
+EmptyResult Socket::connect(const IpAddress& aRemoteIpAddress,
+                            uint16_t aRemotePortInHostOrder) {
+    return _impl->connect(aRemoteIpAddress, aRemotePortInHostOrder);
+}
+
+Result<std::size_t> Socket::send(const void* aData,
+                                 std::size_t aDataByteSize) {
+    return _impl->send(aData, aDataByteSize);
+}
+
 Result<std::size_t> Socket::sendTo(const void* aData,
                                    std::size_t aDataByteSize,
                                    const IpAddress & aRemoteIpAddress,
                                    uint16_t aRemotePortInHostOrder) {
   return _impl->sendTo(aData, aDataByteSize, aRemoteIpAddress, aRemotePortInHostOrder);
+}
+
+Result<std::size_t> Socket::receive(void* aDestinationBuffer,
+                                    std::size_t aDestinationBufferByteSize) {
+    return _impl->receive(aDestinationBuffer, aDestinationBufferByteSize);
 }
 
 Result<std::size_t> Socket::receiveFrom(void* aDestinationBuffer,
