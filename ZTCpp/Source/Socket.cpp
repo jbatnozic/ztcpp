@@ -60,9 +60,9 @@ public:
     }
 
     const auto sockaddr = detail::ToSockaddr(aLocalIpAddress, aLocalPortInHostOrder);
-    const auto res = zts_bind(_socketID,
-                              reinterpret_cast<const struct zts_sockaddr*>(&sockaddr),
-                              sizeof(sockaddr));
+    const auto res = zts_bsd_bind(_socketID,
+                                  reinterpret_cast<const struct zts_sockaddr*>(&sockaddr),
+                                  sizeof(sockaddr));
 
     if (res == ZTS_ERR_OK) {
       return EmptyResultOK();
@@ -102,9 +102,9 @@ public:
       }
 
       const auto sockaddr = detail::ToSockaddr(aRemoteIpAddress, aRemotePortInHostOrder);
-      const auto res = zts_connect(_socketID,
-                                   reinterpret_cast<const struct zts_sockaddr*>(&sockaddr),
-                                   sizeof(sockaddr));
+      const auto res = zts_bsd_connect(_socketID,
+                                       reinterpret_cast<const struct zts_sockaddr*>(&sockaddr),
+                                       sizeof(sockaddr));
 
       if (res == ZTS_ERR_OK) {
           return EmptyResultOK();
@@ -176,11 +176,11 @@ public:
     }
 
     const auto sockaddr = detail::ToSockaddr(aRemoteIpAddress, aLocalPortInHostOrder);
-    const auto byteCount = zts_sendto(_socketID,
-                                      aData, aDataByteSize,
-                                      0,
-                                      reinterpret_cast<const struct zts_sockaddr*>(&sockaddr),
-                                      sizeof(sockaddr));
+    const auto byteCount = zts_bsd_sendto(_socketID,
+                                          aData, aDataByteSize,
+                                          0,
+                                          reinterpret_cast<const struct zts_sockaddr*>(&sockaddr),
+                                          sizeof(sockaddr));
 
     if (byteCount == static_cast<decltype(byteCount)>(aDataByteSize)) {
       return {aDataByteSize};
@@ -248,11 +248,11 @@ public:
     struct zts_sockaddr_storage senderSockaddr;
     zts_socklen_t senderSockaddrLen = sizeof(senderSockaddr);
 
-    const auto byteCount = zts_recvfrom(_socketID,
-                                        aDestinationBuffer, aDestinationBufferByteSize,
-                                        0, 
-                                        reinterpret_cast<struct zts_sockaddr*>(&senderSockaddr), 
-                                        &senderSockaddrLen);
+    const auto byteCount = zts_bsd_recvfrom(_socketID,
+                                            aDestinationBuffer, aDestinationBufferByteSize,
+                                            0, 
+                                            reinterpret_cast<struct zts_sockaddr*>(&senderSockaddr), 
+                                            &senderSockaddrLen);
 
     detail::ToIpAddressAndPort(reinterpret_cast<struct zts_sockaddr_storage*>(&senderSockaddr),
                                aSenderAddress, aSenderPort);
@@ -314,7 +314,7 @@ public:
     pollfd.events |= ((aInterestedIn & PollEventBitmask::ReadyToSend) != 0)                ? ZTS_POLLOUT : 0;
     pollfd.events |= ((aInterestedIn & PollEventBitmask::ReadyToReceivePriorityData) != 0) ? ZTS_POLLPRI : 0;
 
-    const int pollres = zts_poll(&pollfd, 1, static_cast<int>(aMaxTimeToWait.count()));
+    const int pollres = zts_bsd_poll(&pollfd, 1, static_cast<int>(aMaxTimeToWait.count()));
 
     if (pollres == ZTS_ERR_SOCKET) {
       return {ZTCPP_ERROR_REPORT(SocketError,
@@ -356,9 +356,9 @@ public:
   Result<IpAddress> getLocalIpAddress() const {
     struct zts_sockaddr_storage localAddress;
     zts_socklen_t localAddressLen = sizeof(localAddress);
-    const int res = zts_getsockname(_socketID,
-                                    reinterpret_cast<struct zts_sockaddr*>(&localAddress),
-                                    &localAddressLen);
+    const int res = zts_bsd_getsockname(_socketID,
+                                        reinterpret_cast<struct zts_sockaddr*>(&localAddress),
+                                        &localAddressLen);
 
     if (res == ZTS_ERR_OK) {
       IpAddress result;
@@ -387,9 +387,9 @@ public:
   Result<uint16_t> getLocalPort() const {
     struct zts_sockaddr_storage localAddress;
     zts_socklen_t localAddressLen = sizeof(localAddress);
-    const int res = zts_getsockname(_socketID,
-                                    reinterpret_cast<struct zts_sockaddr*>(&localAddress),
-                                    &localAddressLen);
+    const int res = zts_bsd_getsockname(_socketID,
+                                        reinterpret_cast<struct zts_sockaddr*>(&localAddress),
+                                        &localAddressLen);
 
     if (res == ZTS_ERR_OK) {
       IpAddress dummyAddress;
@@ -418,9 +418,9 @@ public:
   Result<IpAddress> getRemoteIpAddress() const {
     struct zts_sockaddr_storage localAddress;
     zts_socklen_t localAddressLen = sizeof(localAddress);
-    const int res = zts_getpeername(_socketID,
-                                    reinterpret_cast<struct zts_sockaddr*>(&localAddress),
-                                    &localAddressLen);
+    const int res = zts_bsd_getpeername(_socketID,
+                                        reinterpret_cast<struct zts_sockaddr*>(&localAddress),
+                                        &localAddressLen);
 
     if (res == ZTS_ERR_OK) {
       IpAddress result;
@@ -449,9 +449,9 @@ public:
   Result<uint16_t> getRemotePort() const {
     struct zts_sockaddr_storage localAddress;
     zts_socklen_t localAddressLen = sizeof(localAddress);
-    const int res = zts_getpeername(_socketID,
-                                    reinterpret_cast<struct zts_sockaddr*>(&localAddress),
-                                    &localAddressLen);
+    const int res = zts_bsd_getpeername(_socketID,
+                                        reinterpret_cast<struct zts_sockaddr*>(&localAddress),
+                                        &localAddressLen);
 
     if (res == ZTS_ERR_OK) {
       IpAddress dummyAddress;

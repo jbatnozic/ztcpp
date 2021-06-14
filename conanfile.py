@@ -3,7 +3,7 @@
 
 class ZtcppConan(ConanFile):
     name = "ztcpp"
-    version = "1.2.0"
+    version = "2.0.0"
 
     # Information for humans
     license = "MIT"
@@ -25,7 +25,7 @@ class ZtcppConan(ConanFile):
 
     exports_sources = ['CMakeLists.txt', 'ZTCpp/*']
 
-    requires = "libzt/1.1.0@jbatnozic/stable"
+    requires = "libzt/2.0.0@jbatnozic/stable"
 
     def config_options(self):
         if self.settings.os == "Windows":

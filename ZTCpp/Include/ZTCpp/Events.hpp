@@ -9,6 +9,8 @@
 
 ZTCPP_NAMESPACE_BEGIN
 
+// TODO (event handling needs more work)
+
 //////////////////////////////////////////////////////////////////////////////
 // Event codes                                                              //
 //////////////////////////////////////////////////////////////////////////////
@@ -293,22 +295,33 @@ private:
 // User-implemented event handler interface                                 //
 //////////////////////////////////////////////////////////////////////////////
 
-class ZTCPP_API IEventHandler {
+class ZTCPP_API EventHandlerInterface {
 public:
   virtual void onAddressEvent(EventCode::Address aEventCode, const AddressDetails* aDetails) noexcept = 0;
+
   virtual void onNetworkEvent(EventCode::Network aEventCode, const NetworkDetails* aDetails) noexcept = 0;
+
   virtual void onNetworkInterfaceEvent(EventCode::NetworkInterface aEventCode, 
                                        const NetworkInterfaceDetails* aDetails) noexcept = 0;
+
   virtual void onNetworkStackEvent(EventCode::NetworkStack aEventCode, 
                                    const NetworkStackDetails* aDetails) noexcept = 0;
+
   virtual void onNodeEvent(EventCode::Node aEventCode, const NodeDetails* aDetails) noexcept = 0;
+
   virtual void onPeerEvent(EventCode::Peer aEventCode, const PeerDetails* aDetails) noexcept = 0;
+
   virtual void onRouteEvent(EventCode::Route aEventCode, const RouteDetails* aDetails) noexcept = 0;
+
   virtual void onUnknownEvent(int16_t aRawZeroTierEventCode) noexcept = 0;
 };
 
-ZTCPP_API void SetEventHandler(IEventHandler* aHandler);
-ZTCPP_API IEventHandler* GetEventHandler();
+//! Internal implementation details - don't use these functions!
+namespace detail {
+void SetEventHandler(EventHandlerInterface* aHandler);
+EventHandlerInterface* GetEventHandler();
+void IntermediateEventHandler(void*);
+} // namespace detail
 
 //////////////////////////////////////////////////////////////////////////////
 // Utility                                                                  //

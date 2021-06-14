@@ -4,6 +4,7 @@
 #include "Sockaddr_util.hpp"
 
 #include <cassert>
+#include <mutex>
 #include <sstream>
 #include <string>
 #include <type_traits>
@@ -15,6 +16,13 @@
 ZTCPP_NAMESPACE_BEGIN
 
 namespace {
+
+using zts_addr_details    = zts_addr_info_t;
+using zts_network_details = zts_net_info_t;
+using zts_netif_details   = zts_netif_info_t;
+using zts_node_details    = zts_node_info_t;
+using zts_peer_details    = zts_peer_info_t;
+using zts_route_details   = zts_route_info_t;
 
 const zts_addr_details* DataToAddressDetails(const void* aData) {
   ZTCPP_ASSERT(aData);
@@ -41,9 +49,9 @@ const zts_peer_details* DataToPeerDetails(const void* aData) {
   return static_cast<const zts_peer_details*>(aData);
 }
 
-const zts_virtual_network_route* DataToRouteDetails(const void* aData) {
+const zts_route_details* DataToRouteDetails(const void* aData) {
   ZTCPP_ASSERT(aData);
-  return static_cast<const zts_virtual_network_route*>(aData);
+  return static_cast<const zts_route_details*>(aData);
 }
 
 } // namespace
@@ -55,7 +63,7 @@ const zts_virtual_network_route* DataToRouteDetails(const void* aData) {
 // *** AddressDetails ***
 
 uint64_t AddressDetails::getNetworkID() const {
-  return DataToAddressDetails(_data)->nwid;
+  return DataToAddressDetails(_data)->net_id;
 }
 
 IpAddress AddressDetails::getIpAddress() const {
@@ -68,7 +76,7 @@ IpAddress AddressDetails::getIpAddress() const {
 // *** NetworkDetails ***
 
 uint64_t NetworkDetails::getNetworkID() const {
-  return DataToNetworkDetails(_data)->nwid;
+  return DataToNetworkDetails(_data)->net_id;
 }
 
 uint64_t NetworkDetails::getMACAddress() const {
@@ -126,27 +134,27 @@ bool NetworkDetails::getBridgeEnabled() const {
 }
 
 bool NetworkDetails::getBroadcastEnabled() const {
-  return (DataToNetworkDetails(_data)->broadcastEnabled != 0);
+  return (DataToNetworkDetails(_data)->broadcast_enabled != 0);
 }
 
 int NetworkDetails::getLastPortError() const {
-  return DataToNetworkDetails(_data)->portError;
+  return DataToNetworkDetails(_data)->port_error;
 }
 
 uint64_t NetworkDetails::getNetworkConfigurationRevision() const {
-  return DataToNetworkDetails(_data)->netconfRevision;
+  return DataToNetworkDetails(_data)->netconf_rev;
 }
 
 uint32_t NetworkDetails::getAssignedAddressCount() const {
-  return DataToNetworkDetails(_data)->assignedAddressCount;
+  return DataToNetworkDetails(_data)->assigned_addr_count;
 }
 
 uint32_t NetworkDetails::getRouteCount() const {
-  return DataToNetworkDetails(_data)->routeCount;
+  return DataToNetworkDetails(_data)->route_count;
 }
 
 uint32_t NetworkDetails::getMulticastSubscriptionCount() const {
-  return DataToNetworkDetails(_data)->multicastSubscriptionCount;
+  return DataToNetworkDetails(_data)->multicast_sub_count;
 }
 
 // *** NetworkInterfaceDetails ***
@@ -159,39 +167,39 @@ uint32_t NetworkDetails::getMulticastSubscriptionCount() const {
 // *** NodeDetails ***
 
 uint64_t NodeDetails::getNodeID() const {
-  return DataToNodeDetails(_data)->address;
+  return DataToNodeDetails(_data)->node_id;
 }
 
 uint16_t NodeDetails::getPrimaryPort() const {
-  return DataToNodeDetails(_data)->primaryPort;
+  return DataToNodeDetails(_data)->port_primary;
 }
 
 uint16_t NodeDetails::getSecondaryPort() const {
-  return DataToNodeDetails(_data)->secondaryPort;
+  return DataToNodeDetails(_data)->port_secondary;
 }
 
 uint16_t NodeDetails::getTertiaryPort() const {
-  return DataToNodeDetails(_data)->tertiaryPort;
+  return DataToNodeDetails(_data)->port_tertiary;
 }
 
 void NodeDetails::getVersion(uint32_t& aMajor, uint32_t& aMinor, uint32_t& aRevision) const {
   const auto* nd = DataToNodeDetails(_data);
-  aMajor = nd->versionMajor;
-  aMinor = nd->versionMinor;
-  aRevision = nd->versionRev;
+  aMajor = nd->ver_major;
+  aMinor = nd->ver_minor;
+  aRevision = nd->ver_rev;
 }
 
 // *** PeerDetails ***
 
 uint64_t PeerDetails::getAddress() const {
-  return DataToPeerDetails(_data)->address;
+  return DataToPeerDetails(_data)->peer_id;
 }
 
 void PeerDetails::getVersion(uint32_t& aMajor, uint32_t& aMinor, uint32_t& aRevision) const {
   const auto* pd = DataToPeerDetails(_data);
-  aMajor = pd->versionMajor;
-  aMinor = pd->versionMinor;
-  aRevision = pd->versionRev;
+  aMajor = pd->ver_major;
+  aMinor = pd->ver_minor;
+  aRevision = pd->ver_rev;
 }
 
 std::chrono::milliseconds PeerDetails::getLatency() const {
@@ -209,14 +217,14 @@ PeerRole PeerDetails::getRole() const {
 }
 
 uint32_t PeerDetails::getPathCount() const {
-  return DataToPeerDetails(_data)->pathCount;
+  return DataToPeerDetails(_data)->path_count;
 }
 
 // *** RouteDetails ***
 // TODO
 
 //////////////////////////////////////////////////////////////////////////////
-// Event dispatching                                                        //
+// Event handling                                                           //
 //////////////////////////////////////////////////////////////////////////////
 
 template <class taZTCppDataClass>
@@ -237,8 +245,9 @@ private:
   const void* _dataPtr;
 };
 
+namespace {
 template <class taZTCppDetailClass, class taEventCodeType, class taZTDataStruct>
-void HandleEvent(IEventHandler& aHandler, int16_t aRawEventCode, const taZTDataStruct* aTZDataStruct) {
+void HandleEvent(EventHandlerInterface& aHandler, int16_t aRawEventCode, const taZTDataStruct* aTZDataStruct) {
   taZTCppDetailClass detailClass;
   PrivateDataSetter<taZTCppDetailClass>{detailClass, aTZDataStruct}.set();
 
@@ -275,7 +284,7 @@ void HandleEvent(IEventHandler& aHandler, int16_t aRawEventCode, const taZTDataS
   // NetworkStack event
   if constexpr (std::is_same<taZTCppDetailClass, NetworkStackDetails>::value) {
     if (aTZDataStruct) {
-     aHandler.onNetworkStackEvent(static_cast<taEventCodeType>(aRawEventCode), &detailClass);
+      aHandler.onNetworkStackEvent(static_cast<taEventCodeType>(aRawEventCode), &detailClass);
     }
     else {
       aHandler.onNetworkStackEvent(static_cast<taEventCodeType>(aRawEventCode), nullptr);
@@ -313,30 +322,47 @@ void HandleEvent(IEventHandler& aHandler, int16_t aRawEventCode, const taZTDataS
   }
 }
 
-void ZeroTierEventCallback(void* aCallbackMessage) {
-  auto* data = static_cast<struct zts_callback_msg*>(aCallbackMessage);
+std::recursive_mutex   g_eventHandlerMutex;
+EventHandlerInterface* g_eventHandler = nullptr;
+} // namespace
+
+namespace detail {
+void SetEventHandler(EventHandlerInterface* aHandler) {
+  std::scoped_lock<std::recursive_mutex> lock{g_eventHandlerMutex};
+  g_eventHandler = aHandler;
+}
+
+EventHandlerInterface* GetEventHandler() {
+  std::scoped_lock<std::recursive_mutex> lock{g_eventHandlerMutex};
+  auto p = g_eventHandler;
+  return p;
+}
+
+void IntermediateEventHandler(void* aEventMessage) {
+  auto* data = static_cast<zts_event_msg_t*>(aEventMessage);
   if (!data) {
     return;
   }
 
+  std::scoped_lock<std::recursive_mutex> lock{g_eventHandlerMutex};
   auto* eventHandler = GetEventHandler();
   if (!eventHandler) {
     return;
   }
 
-  switch (data->eventCode) {
-  // Node events
+  switch (data->event_code) {
+    // Node events
   case ZTS_EVENT_NODE_UP:
   case ZTS_EVENT_NODE_ONLINE:
   case ZTS_EVENT_NODE_OFFLINE:
   case ZTS_EVENT_NODE_DOWN:
-  case ZTS_EVENT_NODE_IDENTITY_COLLISION:
-  case ZTS_EVENT_NODE_UNRECOVERABLE_ERROR:
-  case ZTS_EVENT_NODE_NORMAL_TERMINATION:
-    HandleEvent<NodeDetails, EventCode::Node>(*eventHandler, data->eventCode, data->node);
+    //case ZTS_EVENT_NODE_IDENTITY_COLLISION:
+    //case ZTS_EVENT_NODE_UNRECOVERABLE_ERROR:
+    //case ZTS_EVENT_NODE_NORMAL_TERMINATION:
+    HandleEvent<NodeDetails, EventCode::Node>(*eventHandler, data->event_code, data->node);
     break;
 
-  // Network events
+    // Network events
   case ZTS_EVENT_NETWORK_NOT_FOUND:
   case ZTS_EVENT_NETWORK_CLIENT_TOO_OLD:
   case ZTS_EVENT_NETWORK_REQ_CONFIG:
@@ -347,72 +373,57 @@ void ZeroTierEventCallback(void* aCallbackMessage) {
   case ZTS_EVENT_NETWORK_READY_IP4_IP6:
   case ZTS_EVENT_NETWORK_DOWN:
   case ZTS_EVENT_NETWORK_UPDATE:
-    HandleEvent<NetworkDetails, EventCode::Network>(*eventHandler, data->eventCode, data->network);
+    HandleEvent<NetworkDetails, EventCode::Network>(*eventHandler, data->event_code, data->network);
     break;
 
-  // Network Stack events
+    // Network Stack events
   case ZTS_EVENT_STACK_UP:
   case ZTS_EVENT_STACK_DOWN:
-    HandleEvent<NetworkStackDetails, EventCode::NetworkStack>(*eventHandler, data->eventCode, data->netif);
+    HandleEvent<NetworkStackDetails, EventCode::NetworkStack>(*eventHandler, data->event_code, data->netif);
     break;
 
-  // lwIP netif events
+    // lwIP netif events
   case ZTS_EVENT_NETIF_UP:
   case ZTS_EVENT_NETIF_DOWN:
   case ZTS_EVENT_NETIF_REMOVED:
   case ZTS_EVENT_NETIF_LINK_UP:
   case ZTS_EVENT_NETIF_LINK_DOWN:
-    HandleEvent<NetworkInterfaceDetails, EventCode::NetworkInterface>(*eventHandler, data->eventCode, data->netif);
+    HandleEvent<NetworkInterfaceDetails, EventCode::NetworkInterface>(*eventHandler, data->event_code, data->netif);
     break;
 
-  // Peer events
+    // Peer events
   case ZTS_EVENT_PEER_DIRECT:
   case ZTS_EVENT_PEER_RELAY:
   case ZTS_EVENT_PEER_UNREACHABLE:
   case ZTS_EVENT_PEER_PATH_DISCOVERED:
   case ZTS_EVENT_PEER_PATH_DEAD:
-    HandleEvent<PeerDetails, EventCode::Peer>(*eventHandler, data->eventCode, data->peer);
+    HandleEvent<PeerDetails, EventCode::Peer>(*eventHandler, data->event_code, data->peer);
     break;
 
-  // Route events
+    // Route events
   case ZTS_EVENT_ROUTE_ADDED:
   case ZTS_EVENT_ROUTE_REMOVED:
-    HandleEvent<RouteDetails, EventCode::Route>(*eventHandler, data->eventCode, data->route);
+    HandleEvent<RouteDetails, EventCode::Route>(*eventHandler, data->event_code, data->route);
     break;
 
-  // Address events
+    // Address events
   case ZTS_EVENT_ADDR_ADDED_IP4:
   case ZTS_EVENT_ADDR_REMOVED_IP4:
     data->addr->addr.ss_family = ZTS_AF_INET; // ZT doesn't fill in this info for us
-    HandleEvent<AddressDetails, EventCode::Address>(*eventHandler, data->eventCode, data->addr);
+    HandleEvent<AddressDetails, EventCode::Address>(*eventHandler, data->event_code, data->addr);
     break;
 
   case ZTS_EVENT_ADDR_ADDED_IP6:
   case ZTS_EVENT_ADDR_REMOVED_IP6:
     data->addr->addr.ss_family = ZTS_AF_INET6; // ZT doesn't fill in this info for us
-    HandleEvent<AddressDetails, EventCode::Address>(*eventHandler, data->eventCode, data->addr);
+    HandleEvent<AddressDetails, EventCode::Address>(*eventHandler, data->event_code, data->addr);
     break;
 
   default:
-    eventHandler->onUnknownEvent(data->eventCode);
+    eventHandler->onUnknownEvent(data->event_code);
   }
 }
-
-//////////////////////////////////////////////////////////////////////////////
-// User-implemented event handler interface                                 //
-//////////////////////////////////////////////////////////////////////////////
-
-namespace {
-IEventHandler* g_eventHandler = nullptr;
-}
-
-ZTCPP_API void SetEventHandler(IEventHandler* aHandler) {
-  g_eventHandler = aHandler;
-}
-
-ZTCPP_API IEventHandler* GetEventHandler() {
-  return g_eventHandler;
-}
+} // namespace detail
 
 //////////////////////////////////////////////////////////////////////////////
 // Utility                                                                  //

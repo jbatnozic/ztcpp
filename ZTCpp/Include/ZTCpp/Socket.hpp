@@ -38,9 +38,13 @@ struct PollEventBitmask {
 
 class ZTCPP_API Socket {
 public:
+  //! Creates an uninitialized socket.
   Socket();
+
+  //! Regular destructor.
   ~Socket();
 
+  //! TODO (doc)
   EmptyResult init(SocketDomain aSocketDomain, SocketType aSocketType);
 
   //! Bind the socket to a local address and port.
@@ -61,7 +65,8 @@ public:
   //! Blocks until a new connection is available (you can pollEvent for 
   //! PollEventBitmask::ReadyToAccept if you want to avoid blocking).
   //! Only works for Stream (TCP) sockets and always fails on others.
-  Result<Socket> accept(); // TODO
+  //! TODO (implementation)
+  Result<Socket> accept(); 
 
   //! Sends data to a remote host.
   //! On success, return value = number of bytes sent
