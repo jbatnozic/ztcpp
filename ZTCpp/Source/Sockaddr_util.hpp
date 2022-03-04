@@ -4,6 +4,8 @@
 #include <ZTCpp/Definitions.hpp>
 #include <ZTCpp/Ip_address.hpp>
 
+#include <cstring>
+
 extern "C" {
 struct zts_sockaddr_storage;
 } // extern "C"
