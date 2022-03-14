@@ -522,7 +522,7 @@ ZTCPP_API std::string EventDescription(EventCode::Network aEventCode, const Netw
     else {
       ss << "\n    [No data available]";
     }
-    ss << "\n    Comment: Requiesting configuration, please wait a few seconds.";
+    ss << "\n    Comment: Requesting configuration, please wait a few seconds.";
     break;
 
   case EventCode::Network::OK:

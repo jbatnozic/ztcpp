@@ -14,7 +14,7 @@
 ZTCPP_NAMESPACE_BEGIN
 namespace detail {
 
-//! Convert an IpAdress+port pair into a zts_sockaddr_storage object (can safely be cast into other
+//! Convert an IpAddress+port pair into a zts_sockaddr_storage object (can safely be cast into other
 //! zts_sockaddr_* types).
 //! Don't pass an invalid Ip address object!
 struct zts_sockaddr_storage ToSockaddr(const IpAddress& aIpAddress, std::uint16_t aPortInHostOrder) {

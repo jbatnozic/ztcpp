@@ -38,7 +38,7 @@ struct ErrorReport {
 
 struct DummyResultType {};
 
-//! Template clas that encapsulates either the result (return value) of a
+//! Template class that encapsulates either the result (return value) of a
 //! function call, in case of success, or an error report (as an ErrorReport
 //! object) in case of an error or failure.
 //! ZTCpp does error handing like this because it has to support being a

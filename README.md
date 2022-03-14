@@ -10,11 +10,11 @@ or a PR if you need something that's missing.
 
 ### Why ZTCpp?
 While `libzt` is a great and capable tool, its C-based API is very low-level and thus not always the most comfortable to use.
-In some places it can be confusing if you're not very familiar with the [Berkley socket model](https://en.wikipedia.org/wiki/Berkeley_sockets).
+In some places it can be confusing if you're not very familiar with the [Berkeley socket model](https://en.wikipedia.org/wiki/Berkeley_sockets).
 
 # License
 MIT (see [LICENSE](https://github.com/jbatnozic/ztcpp/blob/master/LICENSE)).
-The licence applies ONLY to files in this repository, and NOT to the library being wrapped (libzt).
+The license applies ONLY to files in this repository, and NOT to the library being wrapped (libzt).
 
 # Instructions
 
@@ -38,7 +38,7 @@ if it is included in the profile you're using.
 **IMPORTANT:** ZTCpp has a dependency on [libzt](https://github.com/jbatnozic/libzt-conan), so make sure to get that first!
 
 ## Consuming the package
-Consumed through a conanfile (.txt or .py) like any other Conan package. Supports both `build-type`s (Debug and Release) as you'd excpect.
+Consumed through a conanfile (.txt or .py) like any other Conan package. Supports both `build-type`s (Debug and Release) as you'd expect.
 
 The only supported options are `fPIC` (except on Windows) and `shared`. Both are boolean (True/False). Note: due to a defect in the CMake files, builds with `ztcpp:shared=False` will not work for now.
 
