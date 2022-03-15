@@ -41,6 +41,14 @@ public:
   //! Creates an uninitialized socket.
   Socket();
 
+  //! Transfers ownsership of another socket to this socket
+  Socket(Socket&&);
+  Socket& operator=(Socket&&);
+
+  //! Copying is unsupported
+  Socket(const Socket&) = delete;
+  Socket& operator=(const Socket&) = delete;
+
   //! Regular destructor.
   ~Socket();
 
@@ -58,14 +66,16 @@ public:
   EmptyResult connect(const IpAddress& aRemoteIpAddress,
                       uint16_t aRemotePortInHostOrder);
 
-  //! Set the socket in a listening state
+  //! Set the socket in a listening state waiting for in coming connections to be
+  //! accepted. The MaxQueueSize indicates how many connections can await acceptance
+  //! at any a time.
+  //! Only works for Stream (TCP) sockets and always fails on others.
   EmptyResult listen(std::size_t aMaxQueueSize); // TODO
 
   //! Accept a new connection and return a new socket to handle that new connection.
   //! Blocks until a new connection is available (you can pollEvent for 
   //! PollEventBitmask::ReadyToAccept if you want to avoid blocking).
   //! Only works for Stream (TCP) sockets and always fails on others.
-  //! TODO (implementation)
   Result<Socket> accept(); 
 
   //! Sends data to a remote host.

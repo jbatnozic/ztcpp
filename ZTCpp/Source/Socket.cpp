@@ -128,6 +128,58 @@ public:
                                  ", zts_errno= " + std::to_string(zts_errno) + ")")};
   }
 
+  EmptyResult listen(std::size_t aMaxQueueSize) {
+      const auto res = zts_bsd_listen(_socketID, aMaxQueueSize);
+
+      if (res == ZTS_ERR_OK) {
+          return EmptyResultOK();
+      }
+
+      if (res == ZTS_ERR_SOCKET) {
+          return {ZTCPP_ERROR_REPORT(SocketError,
+                                     "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+      if (res == ZTS_ERR_SERVICE) {
+          return {ZTCPP_ERROR_REPORT(ServiceError,
+                                     "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+      if (res == ZTS_ERR_ARG) {
+          return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                     "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+
+      return {ZTCPP_ERROR_REPORT(GenericError,
+                                 "Unknown error (zts_connect returned " + std::to_string(res) +
+                                 ", zts_errno= " + std::to_string(zts_errno) + ")")};
+  }
+
+  Result<Socket> accept() {
+      char buffer[ZTS_IP_MAX_STR_LEN];
+      unsigned short port;
+      const auto res = zts_accept(_socketID, buffer, ZTS_IP_MAX_STR_LEN, &port);
+
+      if (res == ZTS_ERR_SOCKET) {
+          return {ZTCPP_ERROR_REPORT(SocketError,
+                                     "ZTS_ERR_SOCKET (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+      if (res == ZTS_ERR_SERVICE) {
+          return {ZTCPP_ERROR_REPORT(ServiceError,
+                                     "ZTS_ERR_SERVICE (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+      if (res == ZTS_ERR_ARG) {
+          return {ZTCPP_ERROR_REPORT(ArgumentError,
+                                     "ZTS_ERR_ARG (zts_errno=" + std::to_string(zts_errno) + ")")};
+      }
+
+      Socket socket;
+      std::unique_ptr<Impl>* socketImpl = (std::unique_ptr<Impl>*) &socket;
+      *socketImpl = std::make_unique<Impl>();
+      **socketImpl = *this;
+      (*socketImpl)->_socketID = res;
+
+      return {std::move(socket)};
+  }
+
   Result<std::size_t> send(const void* aData,
                            std::size_t aDataByteSize) {
       if (aData == nullptr || aDataByteSize == 0) {
@@ -555,6 +607,10 @@ Socket::Socket()
 
 Socket::~Socket() = default;
 
+Socket::Socket(Socket&&) = default;
+
+Socket& Socket::operator=(Socket&&) = default;
+
 EmptyResult Socket::init(SocketDomain aSocketDomain, SocketType aSocketType) {
   return _impl->init(aSocketDomain, aSocketType);
 }
@@ -566,6 +622,14 @@ EmptyResult Socket::bind(const IpAddress & aLocalIpAddress, uint16_t aLocalPortI
 EmptyResult Socket::connect(const IpAddress& aRemoteIpAddress,
                             uint16_t aRemotePortInHostOrder) {
     return _impl->connect(aRemoteIpAddress, aRemotePortInHostOrder);
+}
+
+EmptyResult Socket::listen(std::size_t aMaxQueueSize) {
+  return _impl->listen(aMaxQueueSize);
+}
+
+Result<Socket> Socket::accept() {
+  return _impl->accept();
 }
 
 Result<std::size_t> Socket::send(const void* aData,
