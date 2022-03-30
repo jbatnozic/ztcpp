@@ -22,7 +22,7 @@ IpAddress IpAddress::ipv4Unspecified() {
 
 IpAddress IpAddress::ipv6Unspecified() {
   IpAddress result;
-  result._addressFamily = AddressFamily::IPv4;
+  result._addressFamily = AddressFamily::IPv6;
   std::memset(&(result._addressBuf[0]), 0x00, sizeof(std::uint32_t) * 4);
   result._isValid = true;
   return result;
@@ -38,7 +38,7 @@ IpAddress IpAddress::ipv4Loopback() {
 
 IpAddress IpAddress::ipv6Loopback() {
   IpAddress result;
-  result._addressFamily = AddressFamily::IPv4;
+  result._addressFamily = AddressFamily::IPv6;
   std::memset(&(result._addressBuf[0]), 0x00, sizeof(std::uint32_t) * 4);
   reinterpret_cast<char*>(&(result._addressBuf[0]))[15] = 1;
   result._isValid = true;
