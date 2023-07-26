@@ -3,7 +3,7 @@ User-friendly C++ wrapper over [libzt](https://github.com/zerotier/libzt)'s C in
 
 Also available as [Conan](https://conan.io/) package.
 
-Latest version: `2.1.0`
+Latest version: `3.0.0`
 
 **Note:** ZTCpp does not currently expose all features that libzt offers. Feel free to make a feature request
 or a PR if you need something that's missing.
@@ -24,11 +24,8 @@ The package artifacts are not stored in any global repository, so you will have 
 To do that, download the repository, and in it run the following command from your terminal:
 
 ```
-conan create . @<user>/<channel> --profile=<profile> --build=outdated -s compiler.cppstd=<std>
+conan create . --profile=<profile> --build=outdated -s compiler.cppstd=<std>
 ```
-
-You can choose the `user` and `channel` arbitrarily, however, for compatibility with other Conan packages created by 
-me, I recommend that you use user `jbatnozic` and channel `stable`.
 
 For `profile`, use `default` or one of your own.
 

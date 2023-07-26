@@ -1,28 +1,33 @@
 import os
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.build import can_run
+from conan.tools.files import copy
 
 
 class ZtcppTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
+    generators = "CMakeDeps", "CMakeToolchain"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        for dep in self.dependencies.values():
+            copy(self, "*.dll",   dep.cpp_info.libdirs[0], self.build_folder)
+            copy(self, "*.dylib", dep.cpp_info.libdirs[0], self.build_folder)
+            
 
     def build(self):
         cmake = CMake(self)
-        # Current dir is "test_package/build/<build_id>" and CMakeLists.txt is
-        # in "test_package"
         cmake.configure()
         cmake.build()
 
-    def imports(self):
-        self.copy("*.dll", dst="bin", src="bin")
-        self.copy("*.dylib*", dst="bin", src="lib")
-        self.copy('*.so*', dst='bin', src='lib')
+    def layout(self):
+        cmake_layout(self)
 
     def test(self):
-        if not tools.cross_building(self):
-            os.chdir("bin")
-            if self.settings.os == "Macos":
-                self.run("DYLD_LIBRARY_PATH=$(pwd) .%sexample" % os.sep)
-            else:
-                self.run(".%sexample" % os.sep)
+        if can_run(self):
+            cmd = os.path.join(self.cpp.build.bindir, "ztcpp-conan-test-package")
+            self.run(cmd, env="conanrun")

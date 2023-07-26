@@ -7,7 +7,7 @@ namespace zt = jbatnozic::ztcpp;
 
 int main() 
 try {
-  auto fn = &zt::StartService;
+  auto fn = &zt::LocalNode::start;
   zt::Socket socket;
   const auto res = socket.close();
   ZTCPP_THROW_ON_ERROR(res, std::runtime_error);
