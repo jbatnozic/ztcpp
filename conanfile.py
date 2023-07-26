@@ -38,7 +38,7 @@ class ZtcppConan(ConanFile):
         std = str(self.settings.compiler.cppstd)
         if std in ["98", "gnu98" "11", "gnu11", "14", "gnu14"]:
             raise Exception("ZTCpp requires C++17 or newer standard.")
-            
+
         # Configure options
         if self.options.shared:
             self.options.rm_safe("fPIC")
