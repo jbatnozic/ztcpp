@@ -33,7 +33,9 @@
 
 # Build directories
 **/build/
+**/_build/
 **/Build/
+**/_Build/
 
 # IDE files
 **/.vs/

@@ -1,4 +1,5 @@
 ﻿from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.files import copy
 
@@ -34,10 +35,7 @@ class ZtcppConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def configure(self):
-        # Check that we have at least C++17
-        std = str(self.settings.compiler.cppstd)
-        if std in ["98", "gnu98" "11", "gnu11", "14", "gnu14"]:
-            raise Exception("ZTCpp requires C++17 or newer standard.")
+        check_min_cppstd(self, "17")
 
         # Configure options
         if self.options.shared:
