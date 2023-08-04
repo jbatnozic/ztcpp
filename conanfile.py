@@ -28,7 +28,7 @@ class ZtcppConan(ConanFile):
 
     exports_sources = ['CMakeLists.txt', 'ZTCpp/*']
 
-    requires = "libzt/3.0.0"
+    requires = "libzt/3.0.0@jbatnozic/stable"
 
     def config_options(self):
         if self.settings.os == "Windows":
