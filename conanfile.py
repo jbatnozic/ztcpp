@@ -1,15 +1,15 @@
-﻿from conan import ConanFile
+from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import copy
+from os.path import join
 
-
-class ZtcppConan(ConanFile):
+class ZTCppRecipe(ConanFile):
     name = "ztcpp"
-    version = "3.0.0"
+    version = "3.0.1"
     package_type = "library"
 
-    # Optional metadata
+    # Metadata
     license = "MIT"
     author = "Jovan Batnožić <jovanbatnozic@hotmail.rs>"
     url = "https://github.com/jbatnozic/ztcpp"
@@ -18,7 +18,7 @@ class ZtcppConan(ConanFile):
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True],
+        "shared": [True, False],
         "fPIC": [True, False]
     }
     default_options = {
@@ -26,9 +26,7 @@ class ZtcppConan(ConanFile):
         "fPIC": True
     }
 
-    exports_sources = ['CMakeLists.txt', 'ZTCpp/*']
-
-    requires = "libzt/3.0.0@jbatnozic/stable"
+    exports_sources = "CMakeLists.txt", "Include/*", "Source/*", "Examples/*"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,32 +35,44 @@ class ZtcppConan(ConanFile):
     def configure(self):
         check_min_cppstd(self, "17")
 
-        # Configure options
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
         self.options["libzt"].shared = False
 
-    def generate(self):
-        cmake_deps = CMakeDeps(self)
-        cmake_deps.generate()
+    def requirements(self):
+        self.requires("libzt/3.0.1@jbatnozic/stable")
 
+    def layout(self):
+        cmake_layout(self)
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["ZTCPP_SKIP_EXAMPLES"] = 1
+        if not self.options.shared:
+            tc.variables["ZTCPP_STATIC"] = 1
         tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure()     
+        cmake.configure()
         cmake.build()
 
     def package(self):
         cmake = CMake(self)
         cmake.install()
 
+        copy(self, "*.dll",   self.build_folder, join(self.package_folder, "bin"), keep_path=False)
+        copy(self, "*.a",     self.build_folder, join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.so",    self.build_folder, join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.lib",   self.build_folder, join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dylib", self.build_folder, join(self.package_folder, "lib"), keep_path=False)
+
     def package_info(self):
+        self.cpp_info.includedirs = ["Include"]
         self.cpp_info.libs = ["ztcpp"]
-        self.cpp_info.libdirs = ['lib']
-        self.cpp_info.bindirs = ['bin']
+        self.cpp_info.libdirs = ["lib"]
+        self.cpp_info.bindirs = ["bin"]
         if not self.options.shared:
             self.cpp_info.defines = ["ZTCPP_STATIC"]
