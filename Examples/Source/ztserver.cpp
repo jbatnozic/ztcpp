@@ -2,6 +2,7 @@
  * ztcpp API example
  */
 
+#include <cstring>
 #include <string>
 #include <stdexcept>
 #include <thread>
@@ -94,7 +95,7 @@ int main(int argc, char** argv)
 try {
 #if 1
   if (argc != 5) {
-    printf("\ztcpp example server\n");
+    printf("\nztcpp example server\n");
     printf("server <config_file_path> <nwid> <serverBindPort> <ztServicePort>\n");
     exit(0);
   }

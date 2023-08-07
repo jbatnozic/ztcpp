@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
-project("ztcpp-conan-test-package" CXX)
+cmake_minimum_required(VERSION 3.23)
+project(ztcpp-test-package LANGUAGES CXX)
 
 find_package(ztcpp CONFIG REQUIRED)
 

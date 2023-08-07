@@ -2,6 +2,7 @@
  * ztcpp API example
  */
 
+#include <cstring>
 #include <string>
 #include <stdexcept>
 #include <thread>
