@@ -3,7 +3,7 @@ User-friendly C++ wrapper over [libzt](https://github.com/zerotier/libzt)'s C in
 
 Also available as [Conan](https://conan.io/) package.
 
-Latest version: `3.0.0`
+Latest version: `3.0.2`
 
 **Note:** ZTCpp does not currently expose all features that libzt offers. Feel free to make a feature request
 or a PR if you need something that's missing.

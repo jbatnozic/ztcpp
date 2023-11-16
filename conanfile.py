@@ -6,7 +6,7 @@ from os.path import join
 
 class ZTCppRecipe(ConanFile):
     name = "ztcpp"
-    version = "3.0.1"
+    version = "3.0.2"
     package_type = "library"
 
     # Metadata
@@ -41,7 +41,7 @@ class ZTCppRecipe(ConanFile):
         self.options["libzt"].shared = False
 
     def requirements(self):
-        self.requires("libzt/3.0.1@jbatnozic/stable")
+        self.requires("libzt/3.0.2@jbatnozic/stable")
 
     def layout(self):
         cmake_layout(self)
